@@ -1,0 +1,16 @@
+{
+  "sources": [
+    {
+      "source": "custom",
+      "file": "custom.json"
+    },
+    {
+      "source": "hsk-1",
+      "file": "hsk-1.json"
+    },
+    {
+      "source": "hsk-2",
+      "file": "hsk-2.json"
+    }
+  ]
+}
