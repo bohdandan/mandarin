@@ -83,13 +83,13 @@ def parse_hsk_lesson_tags(value: str) -> list[str]:
 
 def added_year_tag(created_at: str) -> str:
     match = re.match(r"^(\d{4})", created_at)
-    return f"added-{match.group(1)}" if match else ""
+    return f"ADDED-{match.group(1)}" if match else ""
 
 
 def custom_year_tag(lesson: str, created_at: str) -> str:
     match = re.match(r"^(\d{4})", lesson)
     if match:
-        return f"added-{match.group(1)}"
+        return f"ADDED-{match.group(1)}"
     return added_year_tag(created_at)
 
 
@@ -100,18 +100,18 @@ def derive_tags(entry: dict[str, Any]) -> list[str]:
     hsk_level = entry.get("hsk_level")
     tags: list[str] = []
     if hsk_level is not None:
-        tags.append(f"hsk{hsk_level}")
+        tags.append(f"HSK{hsk_level}")
     tags.extend(parse_hsk_lesson_tags(lesson))
     if source == "custom":
-        tags.append("custom")
+        tags.append("CUSTOM")
         tags.append(custom_year_tag(lesson, created_at))
     if lesson and lesson.startswith("lesson-"):
-        tags.append(lesson)
+        tags.append(lesson.upper())
     return unique_ordered(tags)
 
 
 def make_entry_id(source: str, raw_id: Any, hanzi: str, pinyin: str, hsk_level: int | None) -> str:
-    prefix = f"hsk{hsk_level}" if hsk_level is not None else source
+    prefix = source if source == "custom" else f"hsk{hsk_level}" if hsk_level is not None else source
     raw = clean_text(raw_id)
     if raw:
         number_match = re.match(r"^(\d+)(?:\.0)?$", raw)

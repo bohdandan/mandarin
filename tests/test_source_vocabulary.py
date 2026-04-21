@@ -19,9 +19,10 @@ class SourceVocabularyTest(unittest.TestCase):
             today="2026-04-19",
         )
 
+        self.assertEqual(entry["id"], "custom-word-bei-zi")
         self.assertNotIn("tags", entry)
         self.assertEqual(entry["lesson"], "2026")
-        self.assertEqual(derive_tags(entry), ["hsk2", "custom", "added-2026"])
+        self.assertEqual(derive_tags(entry), ["HSK2", "CUSTOM", "ADDED-2026"])
 
     def test_source_filename_is_stable_and_safe(self):
         self.assertEqual(source_filename("hsk-workbook"), "hsk-workbook.json")
@@ -77,11 +78,11 @@ class SourceVocabularyTest(unittest.TestCase):
             self.assertEqual(entry["hsk_level"], 1)
             tags = derive_tags(entry)
             self.assertTrue(tags)
-            self.assertEqual(tags[0], "hsk1")
-            self.assertTrue(all(tag == "hsk1" or hsk1_lesson_tag.match(tag) for tag in tags))
+            self.assertEqual(tags[0], "HSK1")
+            self.assertTrue(all(tag == "HSK1" or hsk1_lesson_tag.match(tag) for tag in tags))
 
         hsk1_by_hanzi = {entry["hanzi"]: entry for entry in hsk1_entries}
-        self.assertEqual(derive_tags(hsk1_by_hanzi["上"]), ["hsk1", "HSK1::HSK:1.09", "HSK1::HSK:1.14"])
+        self.assertEqual(derive_tags(hsk1_by_hanzi["上"]), ["HSK1", "HSK1::HSK:1.09", "HSK1::HSK:1.14"])
         self.assertIn("Proper noun", hsk1_by_hanzi["大兴机场"]["notes"])
         self.assertIn("beyond the syllabus", hsk1_by_hanzi["病人"]["notes"])
 
@@ -89,16 +90,16 @@ class SourceVocabularyTest(unittest.TestCase):
             self.assertNotIn("tags", entry)
             tags = derive_tags(entry)
             self.assertTrue(tags)
-            self.assertEqual(tags[0], "hsk2")
-            self.assertTrue(all(tag == "hsk2" or hsk2_lesson_tag.match(tag) for tag in tags))
+            self.assertEqual(tags[0], "HSK2")
+            self.assertTrue(all(tag == "HSK2" or hsk2_lesson_tag.match(tag) for tag in tags))
 
         for entry in custom_entries:
             self.assertNotIn("tags", entry)
             self.assertEqual(entry["source"], "custom")
             self.assertEqual(entry["lesson"], "2026")
             self.assertIsInstance(entry["hsk_level"], int)
-            self.assertIn("custom", derive_tags(entry))
-            self.assertIn("added-2026", derive_tags(entry))
+            self.assertIn("CUSTOM", derive_tags(entry))
+            self.assertIn("ADDED-2026", derive_tags(entry))
 
 
 if __name__ == "__main__":

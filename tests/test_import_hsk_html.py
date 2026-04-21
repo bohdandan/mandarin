@@ -25,13 +25,13 @@ class ImportHskHtmlTest(unittest.TestCase):
         self.assertEqual(entries[0]["id"], "hsk2-0001-a")
         self.assertEqual(entries[0]["lesson"], "HSK:2.02")
         self.assertNotIn("tags", entries[0])
-        self.assertEqual(derive_tags(entries[0]), ["hsk2", "HSK2::HSK:2.02"])
+        self.assertEqual(derive_tags(entries[0]), ["HSK2", "HSK2::HSK:2.02"])
         self.assertEqual(entries[2]["notes"], "Part of speech: noun; Source marker: 花2")
         self.assertEqual(entries[2]["lesson"], "HSK:2.08; HSK:2.13")
-        self.assertEqual(derive_tags(entries[2]), ["hsk2", "HSK2::HSK:2.08", "HSK2::HSK:2.13"])
+        self.assertEqual(derive_tags(entries[2]), ["HSK2", "HSK2::HSK:2.08", "HSK2::HSK:2.13"])
         self.assertEqual(entries[3]["pinyin"], "wèi shénme")
         self.assertEqual(entries[3]["lesson"], "HSK:2.03")
-        self.assertEqual(derive_tags(entries[3]), ["hsk2", "HSK2::HSK:2.03"])
+        self.assertEqual(derive_tags(entries[3]), ["HSK2", "HSK2::HSK:2.03"])
         self.assertEqual(validate_entries(entries), [])
 
     def test_import_replaces_target_and_removed_sources(self):

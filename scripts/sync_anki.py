@@ -10,6 +10,7 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from scripts.chinese_support import is_generated_tag
 from scripts.vocabulary import derive_tags, read_source_vocabulary, read_vocabulary
 
 
@@ -78,6 +79,17 @@ def invoke_anki(action: str, params: dict[str, Any] | None = None) -> Any:
     return result.get("result")
 
 
+def normalize_generated_tag_case() -> None:
+    for tag in invoke_anki("getTags"):
+        if not is_generated_tag(tag):
+            continue
+        upper = tag.upper()
+        if tag == upper:
+            continue
+        invoke_anki("replaceTagsInAllNotes", {"tag_to_replace": tag, "replace_with_tag": upper})
+    invoke_anki("clearUnusedTags")
+
+
 def ensure_deck(deck_name: str) -> None:
     invoke_anki("createDeck", {"deck": deck_name})
 
@@ -123,6 +135,8 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
             invoke_anki("updateNoteFields", {"note": {"id": note_id, "fields": entry_fields(entry)}})
             invoke_anki("addTags", {"notes": [note_id], "tags": " ".join(anki_tags(entry))})
 
+    if not dry_run:
+        normalize_generated_tag_case()
     return summary
 
 

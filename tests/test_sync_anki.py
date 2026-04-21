@@ -27,7 +27,7 @@ class SyncAnkiTest(unittest.TestCase):
         self.assertEqual(note["modelName"], "Mandarin Vocabulary")
         self.assertEqual(note["fields"]["Vocabulary ID"], "hsk2-0200-shou-biao")
         self.assertEqual(note["fields"]["Hanzi"], "手表")
-        self.assertEqual(note["tags"], ["hsk2", "HSK2::HSK:2.08"])
+        self.assertEqual(note["tags"], ["HSK2", "HSK2::HSK:2.08"])
 
     def test_duplicate_query_uses_stable_vocabulary_id(self):
         query = duplicate_query("hsk2-0200-shou-biao", model_name="Mandarin Vocabulary")

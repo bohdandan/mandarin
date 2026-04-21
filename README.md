@@ -48,6 +48,8 @@ Custom words use `source: "custom"`, an approximate `hsk_level`, and the year in
 
 This repo already includes a GitHub Actions workflow for Pages deployment.
 
+Live site: [bohdandan.github.io/mandarin](https://bohdandan.github.io/mandarin/)
+
 1. Create an empty public GitHub repository.
 2. Add it as `origin`.
 3. Push `main`.
