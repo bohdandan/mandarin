@@ -8,6 +8,7 @@ import {
   type VocabularyEntry,
   type VocabularyFilters,
 } from "./lib/vocabulary";
+import { VocabularyDetailDialog } from "./vocabulary-detail";
 
 const imageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Chinese_Brush_for_Writing_Calligraphy.jpg?width=1200";
 
@@ -273,35 +274,7 @@ function App() {
 
       {selectedEntry ? (
         <div className="detail-backdrop" role="presentation" onClick={() => setSelectedEntry(null)}>
-          <article
-            aria-labelledby="detail-title"
-            aria-modal="true"
-            className="detail-dialog"
-            role="dialog"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="detail-header">
-              <div>
-                <h2 id="detail-title">{selectedEntry.hanzi}</h2>
-                <p>{selectedEntry.pinyin}</p>
-              </div>
-              <button className="close-button" type="button" onClick={() => setSelectedEntry(null)}>
-                Close
-              </button>
-            </div>
-            <p className="meaning">{selectedEntry.english}</p>
-            {selectedEntry.example_sentence ? (
-              <p className="example" dangerouslySetInnerHTML={{ __html: selectedEntry.example_sentence }} />
-            ) : null}
-            {selectedEntry.sentence_pinyin ? <p className="sentence-pinyin">{selectedEntry.sentence_pinyin}</p> : null}
-            {selectedEntry.sentence_translation ? <p className="sentence-translation">{selectedEntry.sentence_translation}</p> : null}
-            <div className="tag-row">
-              {getDisplayTags(selectedEntry).map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-            </div>
-            {selectedEntry.notes ? <p className="notes">{selectedEntry.notes}</p> : null}
-          </article>
+          <VocabularyDetailDialog entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
         </div>
       ) : null}
     </main>

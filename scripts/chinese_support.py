@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import unicodedata
 from typing import Any
+from urllib.parse import quote
 
 
 PINYIN_TOKEN_RE = re.compile(r"[A-Za-züÜāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙǕǗǙǛńňǹḿŃŇǸḾ]+")
@@ -15,6 +16,9 @@ GENERATED_TAG_PATTERNS = [
     re.compile(r"^ADDED-\d{4}$", re.I),
     re.compile(r"^LESSON-.*$", re.I),
 ]
+WRITTEN_CHINESE_BASE_URL = "https://dictionary.writtenchinese.com/#sk={}&svt=pinyin"
+CHINESE_ADVANCED_LIGHT_NEUTRAL = "#6c757d"
+CHINESE_ADVANCED_DARK_NEUTRAL = "#6272a4"
 
 
 def swift_string_literal(text: str) -> str:
@@ -107,6 +111,107 @@ def split_marked_pinyin_by_guide(marked_pinyin: str, guide_syllables: list[str])
 
 def tone_span(text: str, tone: int) -> str:
     return f'<span class="tone{tone}">{text}</span>'
+
+
+def written_chinese_url(hanzi: str) -> str:
+    return WRITTEN_CHINESE_BASE_URL.format(quote(str(hanzi), safe=""))
+
+
+def written_chinese_footer_html() -> str:
+    return (
+        '<div class="meta-row">'
+        '<div class="tags">{{Tags}}</div>'
+        '<a id="written-chinese-link" class="written-chinese-link" href="#" rel="noreferrer noopener" '
+        'target="_blank" title="Character breakdown" aria-label="Character breakdown">◫</a>'
+        "</div>"
+        '<script>(function(){var hanzi="{{text:Hanzi}}";var link=document.getElementById("written-chinese-link");'
+        'if(link&&hanzi){link.href="https://dictionary.writtenchinese.com/#sk="+encodeURIComponent(hanzi)+"&svt=pinyin";}})();</script>'
+    )
+
+
+def with_written_chinese_footer(back_template: str) -> str:
+    cleaned = re.sub(
+        r'\s*<div class="meta-row">.*?id="written-chinese-link".*?</script>\s*',
+        "\n\n",
+        back_template,
+        flags=re.S,
+    )
+    cleaned = re.sub(
+        r'\s*<footer.*?id="written-chinese-link".*?</script>\s*',
+        "\n\n",
+        cleaned,
+        flags=re.S,
+    )
+    if '<div class="tags">{{Tags}}</div>' in cleaned:
+        cleaned = cleaned.replace('<div class="tags">{{Tags}}</div>', written_chinese_footer_html(), 1)
+        return cleaned
+    return f"{cleaned.rstrip()}\n\n{written_chinese_footer_html()}"
+
+
+def chinese_advanced_back_template() -> str:
+    return with_written_chinese_footer(
+        "{{FrontSide}}<hr><div>{{Pinyin}}</div><div>{{English}}</div><p>{{Example Sentence}}</p><p>{{Sentence Pinyin}}</p><div class=\"tags\">{{Tags}}</div>"
+    )
+
+
+def updated_chinese_advanced_css(css: str) -> str:
+    updated = re.sub(
+        r"(\.chinese\s*\{[^}]*?color:\s*)#[0-9a-fA-F]{6}(;)",
+        rf"\g<1>{CHINESE_ADVANCED_LIGHT_NEUTRAL}\2",
+        css,
+        count=1,
+        flags=re.S,
+    )
+    updated = re.sub(
+        r"(\.night_mode\s+\.chinese\s*\{\s*color:\s*)#[0-9a-fA-F]{6}(;\s*\})",
+        rf"\g<1>{CHINESE_ADVANCED_DARK_NEUTRAL}\2",
+        updated,
+        count=1,
+        flags=re.S,
+    )
+
+    footer_styles = (
+        "\n\n.meta-row {\n"
+        "  display: flex;\n"
+        "  gap: 12px;\n"
+        "  align-items: flex-end;\n"
+        "  justify-content: space-between;\n"
+        "  margin-top: 20px;\n"
+        "}\n"
+        "\n"
+        ".meta-row .tags {\n"
+        "  flex: 1;\n"
+        "  margin-top: 0;\n"
+        "  text-align: left;\n"
+        "}\n"
+        "\n"
+        ".written-chinese-link {\n"
+        f"  color: {CHINESE_ADVANCED_LIGHT_NEUTRAL};\n"
+        "  text-decoration: none;\n"
+        "  font-size: 14px;\n"
+        "  line-height: 1;\n"
+        "  opacity: 0.85;\n"
+        "}\n"
+        "\n"
+        ".night_mode .written-chinese-link {\n"
+        f"  color: {CHINESE_ADVANCED_DARK_NEUTRAL};\n"
+        "}\n"
+        "\n"
+        ".written-chinese-link:hover,\n"
+        ".written-chinese-link:focus {\n"
+        "  opacity: 1;\n"
+        "}\n"
+    )
+
+    updated = re.sub(r"\n*\.meta-row\s*\{.*?(?=\n(?:/\*|\.[A-Za-z#]))", "\n", updated, flags=re.S)
+    updated = re.sub(r"\n*\.meta-row\s+\.tags\s*\{.*?(?=\n(?:/\*|\.[A-Za-z#]))", "\n", updated, flags=re.S)
+    updated = re.sub(r"\n*\.written-chinese-link\s*\{.*?(?=\n(?:/\*|\.[A-Za-z#]))", "\n", updated, flags=re.S)
+    updated = re.sub(r"\n*\.night_mode\s+\.written-chinese-link\s*\{.*?(?=\n(?:/\*|\.[A-Za-z#]))", "\n", updated, flags=re.S)
+    updated = re.sub(r"\n*\.written-chinese-link:hover,\s*\.written-chinese-link:focus\s*\{.*?(?=\n(?:/\*|\.[A-Za-z#]))", "\n", updated, flags=re.S)
+
+    if ".written-chinese-link {" not in updated:
+        updated = updated.rstrip() + footer_styles
+    return updated
 
 
 def pinyin_comment(syllables: list[str]) -> str:

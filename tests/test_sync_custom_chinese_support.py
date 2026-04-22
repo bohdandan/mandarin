@@ -4,6 +4,7 @@ import re
 from scripts.sync_custom_to_chinese_support import (
     build_chinese_advanced_fields,
     latin_guide_syllables,
+    should_regenerate_audio,
     split_marked_pinyin_by_guide,
 )
 from scripts.vocabulary import strip_html
@@ -15,6 +16,15 @@ def visible_text(value: str) -> str:
 
 
 class SyncCustomToChineseSupportTest(unittest.TestCase):
+    def test_should_regenerate_audio_only_for_selected_entries(self):
+        entry = {"id": "custom-keyi", "hanzi": "可以"}
+
+        self.assertFalse(should_regenerate_audio(entry, regenerate_audio=False, audio_targets=set()))
+        self.assertFalse(should_regenerate_audio(entry, regenerate_audio=True, audio_targets=set()))
+        self.assertTrue(should_regenerate_audio(entry, regenerate_audio=True, audio_targets={"可以"}))
+        self.assertTrue(should_regenerate_audio(entry, regenerate_audio=True, audio_targets={"custom-keyi"}))
+        self.assertFalse(should_regenerate_audio(entry, regenerate_audio=True, audio_targets={"地方"}))
+
     def test_latin_guide_syllables_keep_accented_vowels_inside_syllables(self):
         self.assertEqual(latin_guide_syllables("订票"), ["dìng", "piào"])
         self.assertEqual(latin_guide_syllables("加油"), ["jiā", "yóu"])

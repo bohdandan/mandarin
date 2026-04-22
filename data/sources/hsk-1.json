@@ -1577,8 +1577,8 @@
   {
     "id": "hsk1-0106-ke-yi",
     "hanzi": "可以",
-    "pinyin": "ké yǐ",
-    "english": "not bad",
+    "pinyin": "kě yǐ",
+    "english": "can/ may",
     "example_sentence": "",
     "sentence_pinyin": "",
     "sentence_translation": "",
@@ -1587,7 +1587,7 @@
     "lesson": "HSK:1.13",
     "notes": "",
     "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
+    "updated_at": "2026-04-21"
   },
   {
     "id": "hsk1-0107-ke",
@@ -3738,21 +3738,6 @@
     "id": "hsk1-0250-xing-qi-ri",
     "hanzi": "星期日",
     "pinyin": "xīng qī rì",
-    "english": "sunday",
-    "example_sentence": "",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 1,
-    "source": "hsk-1",
-    "lesson": "HSK:1.05",
-    "notes": "",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
-  },
-  {
-    "id": "hsk1-0251-xing-qi-tian",
-    "hanzi": "星期天",
-    "pinyin": "xīng qī tiān",
     "english": "sunday",
     "example_sentence": "",
     "sentence_pinyin": "",

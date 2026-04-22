@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import argparse
 import base64
+import os
 import subprocess
 import sys
-import tempfile
 import urllib.error
 from pathlib import Path
 from typing import Any
@@ -21,25 +21,32 @@ from scripts.chinese_support import (
     split_marked_pinyin_by_guide,
     traditional_hanzi,
 )
-from scripts.vocabulary import derive_tags, pinyin_slug, read_source_vocabulary
+from scripts.google_tts import load_google_tts_config, synthesize_audio
+from scripts.vocabulary import derive_tags, read_source_vocabulary
 
 
 DEFAULT_DECK = "HSK [Chinese Support]::Custom"
 DEFAULT_MODEL = "Chinese (Advanced)"
-DEFAULT_VOICE = "Tingting"
+DEFAULT_VOICE = "cmn-CN-Wavenet-A"
 
 
 def generate_sound_ref(entry: dict[str, Any], voice: str) -> str:
-    filename = f"{entry['id']}_{pinyin_slug(voice)}.aiff"
-    with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as handle:
-        tmp_path = Path(handle.name)
-    try:
-        subprocess.run(["say", "-v", voice, "-o", str(tmp_path), str(entry["hanzi"])], check=True, capture_output=True)
-        payload = base64.b64encode(tmp_path.read_bytes()).decode("ascii")
-        invoke_anki("storeMediaFile", {"filename": filename, "data": payload})
-    finally:
-        tmp_path.unlink(missing_ok=True)
+    config = load_google_tts_config(
+        {
+            **os.environ,
+            "GOOGLE_TTS_VOICE_NAME": voice,
+        }
+    )
+    filename, audio_bytes = synthesize_audio(entry, config)
+    payload = base64.b64encode(audio_bytes).decode("ascii")
+    invoke_anki("storeMediaFile", {"filename": filename, "data": payload})
     return f"[sound:{filename}]"
+
+
+def should_regenerate_audio(entry: dict[str, Any], *, regenerate_audio: bool, audio_targets: set[str]) -> bool:
+    if not regenerate_audio or not audio_targets:
+        return False
+    return str(entry.get("hanzi") or "") in audio_targets or str(entry.get("id") or "") in audio_targets
 
 
 def repo_custom_entries(data_path: Path) -> list[dict[str, Any]]:
@@ -61,25 +68,30 @@ def sync_custom_deck(
     model_name: str,
     voice: str,
     update_existing: bool = False,
+    regenerate_audio: bool = False,
+    audio_targets: set[str] | None = None,
 ) -> dict[str, int]:
     summary = {"added": 0, "updated": 0, "unchanged": 0}
     repo_entries = repo_custom_entries(data_path)
     existing_notes = existing_custom_notes(deck_name, model_name)
+    selected_audio_targets = audio_targets or set()
 
     for entry in repo_entries:
         existing = existing_notes.get(str(entry["hanzi"]))
-        if existing is not None and not update_existing:
+        regenerate_selected_audio = should_regenerate_audio(
+            entry,
+            regenerate_audio=regenerate_audio,
+            audio_targets=selected_audio_targets,
+        )
+        if existing is not None and not update_existing and not regenerate_selected_audio:
             summary["unchanged"] += 1
             continue
 
         guide = latin_guide_syllables(str(entry["hanzi"]))
         pinyin_syllables = split_marked_pinyin_by_guide(str(entry["pinyin"]), guide)
         bopo_syllables = bopomofo_syllables(pinyin_syllables)
-        sound_ref = (
-            str(existing["fields"].get("Sound", {}).get("value") or "")
-            if existing is not None
-            else ""
-        ) or generate_sound_ref(entry, voice)
+        existing_sound = str(existing["fields"].get("Sound", {}).get("value") or "") if existing is not None else ""
+        sound_ref = generate_sound_ref(entry, voice) if regenerate_selected_audio else (existing_sound or generate_sound_ref(entry, voice))
         fields = build_chinese_advanced_fields(
             entry,
             pinyin_syllables=pinyin_syllables,
@@ -131,7 +143,13 @@ def main() -> int:
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--voice", default=DEFAULT_VOICE)
     parser.add_argument("--update-existing", action="store_true")
+    parser.add_argument("--regenerate-audio", action="store_true")
+    parser.add_argument("--audio-target", action="append", default=[])
     args = parser.parse_args()
+
+    if args.regenerate_audio and not args.audio_target:
+        print("Custom sync failed: --regenerate-audio requires at least one --audio-target.")
+        return 1
 
     try:
         summary = sync_custom_deck(
@@ -140,10 +158,12 @@ def main() -> int:
             model_name=args.model,
             voice=args.voice,
             update_existing=args.update_existing,
+            regenerate_audio=args.regenerate_audio,
+            audio_targets=set(args.audio_target),
         )
     except (subprocess.CalledProcessError, urllib.error.URLError, RuntimeError) as error:
         print(f"Custom sync failed: {error}")
-        print("Open Anki with AnkiConnect enabled, then run this script again.")
+        print("Open Anki with AnkiConnect enabled, confirm Google ADC is configured, then run this script again.")
         return 1
 
     normalize_generated_tag_case()

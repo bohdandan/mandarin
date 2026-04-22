@@ -1,7 +1,14 @@
 import re
 import unittest
 
-from scripts.chinese_support import build_tone_fields, primary_citation_pinyin, reconcile_generated_tags
+from scripts.chinese_support import (
+    build_tone_fields,
+    chinese_advanced_back_template,
+    primary_citation_pinyin,
+    reconcile_generated_tags,
+    updated_chinese_advanced_css,
+    written_chinese_url,
+)
 from scripts.vocabulary import strip_html
 
 
@@ -11,6 +18,38 @@ def visible_text(value: str) -> str:
 
 
 class ChineseSupportToneFieldTest(unittest.TestCase):
+    def test_written_chinese_url_encodes_hanzi(self):
+        self.assertEqual(
+            written_chinese_url("我"),
+            "https://dictionary.writtenchinese.com/#sk=%E6%88%91&svt=pinyin",
+        )
+
+    def test_chinese_advanced_back_template_includes_footer_link(self):
+        template = chinese_advanced_back_template()
+
+        self.assertIn(">◫</a>", template)
+        self.assertIn("encodeURIComponent", template)
+        self.assertIn("dictionary.writtenchinese.com", template)
+        self.assertIn("{{text:Hanzi}}", template)
+        self.assertIn('class="meta-row"', template)
+        self.assertNotIn(">Character breakdown<", template)
+
+    def test_updated_chinese_advanced_css_uses_neutral_hanzi_and_footer_link_styles(self):
+        original = (
+            ".chinese {\n  color: #ff6e67;\n}\n"
+            ".night_mode .chinese { color: #ff79c6; }\n"
+            ".tags {\n  font-size: 9pt;\n  opacity: 0.6;\n  margin-top: 20px;\n}\n"
+        )
+
+        updated = updated_chinese_advanced_css(original)
+
+        self.assertIn("color: #6c757d;", updated)
+        self.assertIn(".night_mode .chinese { color: #6272a4; }", updated)
+        self.assertIn(".meta-row {", updated)
+        self.assertIn(".written-chinese-link {", updated)
+        self.assertIn(".night_mode .written-chinese-link {", updated)
+        self.assertIn("color: #6272a4;", updated)
+
     def test_primary_citation_pinyin_keeps_first_variant(self):
         self.assertEqual(primary_citation_pinyin("shàng/shang"), "shàng")
         self.assertEqual(primary_citation_pinyin("shéi/shuí"), "shéi")

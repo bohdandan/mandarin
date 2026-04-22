@@ -23,9 +23,29 @@ npm run build
 python3 scripts/import_hsk_html.py /tmp/new-hsk-2.html --level 2 --source-url https://mandarinbean.com/new-hsk-2-word-list/ --remove-source hsk-workbook
 python3 scripts/validate_vocabulary.py
 python3 scripts/sync_anki.py
+python3 scripts/sync_custom_to_chinese_support.py --regenerate-audio --audio-target 地方
 ```
 
 Anki must be open with the AnkiConnect add-on installed before running `sync_anki.py`.
+
+For Google TTS audio regeneration, also configure:
+
+```bash
+gcloud auth application-default login
+export GOOGLE_CLOUD_PROJECT="your-project-id"  # optional if ADC already has a quota project
+export GOOGLE_TTS_VOICE_NAME="cmn-CN-Wavenet-A"
+```
+
+Selected-word regeneration is explicit. Example:
+
+```bash
+python3 scripts/sync_custom_to_chinese_support.py \
+  --regenerate-audio \
+  --audio-target 地方 \
+  --audio-target 照顾
+```
+
+Without `--regenerate-audio`, existing custom audio is left untouched.
 
 ## Data
 
