@@ -4,6 +4,7 @@ import re
 import subprocess
 import tempfile
 import unicodedata
+import json
 from typing import Any
 from urllib.parse import quote
 
@@ -126,6 +127,15 @@ def written_chinese_footer_html() -> str:
         "</div>"
         '<script>(function(){var hanzi="{{text:Hanzi}}";var link=document.getElementById("written-chinese-link");'
         'if(link&&hanzi){link.href="https://dictionary.writtenchinese.com/#sk="+encodeURIComponent(hanzi)+"&svt=pinyin";}})();</script>'
+    )
+
+
+def written_chinese_footer_placeholder_html() -> str:
+    return (
+        '<div class="meta-row">'
+        '<div class="tags">{{Tags}}</div>'
+        '<span class="written-chinese-placeholder" aria-hidden="true">◫</span>'
+        "</div>"
     )
 
 
@@ -318,6 +328,19 @@ def build_tone_fields(hanzi: str, marked_pinyin: str) -> dict[str, str]:
     }
 
 
+def build_display_tone_fields(
+    hanzi: str,
+    marked_pinyin: str,
+    *,
+    guide_syllables: list[str] | None = None,
+) -> dict[str, str]:
+    pinyin_syllables = split_marked_pinyin_by_guide(marked_pinyin, guide_syllables or latin_guide_syllables(hanzi))
+    return {
+        "Color": color_text(hanzi, pinyin_syllables),
+        "Pinyin": pinyin_field_html(marked_pinyin, pinyin_syllables),
+    }
+
+
 def build_chinese_advanced_fields(
     entry: dict[str, Any],
     *,
@@ -360,8 +383,44 @@ def swift_transform(text: str, transform: str) -> str:
     return result.stdout.strip()
 
 
+def swift_transform_many(values: list[str], transform: str) -> list[str]:
+    if not values:
+        return []
+    payload = json.dumps(values, ensure_ascii=False)
+    with tempfile.TemporaryDirectory() as module_cache:
+        swift_args = ["swift", "-module-cache-path", module_cache]
+        code = f"""
+import Foundation
+
+let payload = {swift_string_literal(payload)}
+let data = payload.data(using: .utf8)!
+let values = try! JSONSerialization.jsonObject(with: data) as! [String]
+let transformed = values.map {{ value -> String in
+    let ns = value as NSString
+    if {swift_string_literal(transform)} == "toLatin" {{
+        return ns.applyingTransform(.toLatin, reverse: false) ?? value
+    }}
+    let t = StringTransform(rawValue: {swift_string_literal(transform)})
+    return ns.applyingTransform(t, reverse: false) ?? value
+}}
+let out = try! JSONSerialization.data(withJSONObject: transformed)
+print(String(data: out, encoding: .utf8)!)
+""".strip()
+        result = subprocess.run(swift_args + ["-e", code], capture_output=True, text=True, check=True)
+    return [str(value) for value in json.loads(result.stdout)]
+
+
 def latin_guide_syllables(hanzi: str) -> list[str]:
     return PINYIN_TOKEN_RE.findall(swift_transform(hanzi, "toLatin"))
+
+
+def bulk_latin_guide_syllables(hanzi_values: list[str]) -> dict[str, list[str]]:
+    unique_hanzi = list(dict.fromkeys(str(value) for value in hanzi_values if value))
+    transformed = swift_transform_many(unique_hanzi, "toLatin")
+    return {
+        hanzi: PINYIN_TOKEN_RE.findall(latin)
+        for hanzi, latin in zip(unique_hanzi, transformed, strict=True)
+    }
 
 
 def bopomofo_syllables(pinyin_syllables: list[str]) -> list[str]:

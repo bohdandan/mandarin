@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
 import { VocabularyDetailDialog } from "./vocabulary-detail";
 import type { VocabularyEntry } from "./lib/vocabulary";
+import { writtenChineseUrl } from "./lib/written-chinese";
 
 const entry: VocabularyEntry = {
   id: "custom-keyi",
@@ -20,7 +21,7 @@ const entry: VocabularyEntry = {
 };
 
 describe("VocabularyDetailDialog", () => {
-  test("renders the compact character breakdown link in the footer meta row", () => {
+  test("renders a centered title stack and the compact character breakdown link in the footer", () => {
     const markup = renderToStaticMarkup(<VocabularyDetailDialog entry={entry} onClose={() => undefined} />);
 
     const footerStart = markup.indexOf('class="detail-meta-row"');
@@ -30,8 +31,10 @@ describe("VocabularyDetailDialog", () => {
 
     expect(footerStart).toBeGreaterThan(-1);
     expect(linkStart).toBeGreaterThan(footerStart);
+    expect(markup).toContain('class="detail-title-block"');
     expect(markup).toContain(">◫</a>");
     expect(markup).toContain('aria-label="Character breakdown"');
+    expect(markup).toContain(`href="${writtenChineseUrl(entry.hanzi).replace("&", "&amp;")}"`);
     expect(markup.slice(pinyinStart, pinyinEnd)).not.toContain("◫");
   });
 });

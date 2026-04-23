@@ -48,7 +48,7 @@ describe("filterVocabulary", () => {
   test("searches hanzi, pinyin, english, examples, and generated tags", () => {
     expect(filterVocabulary(entries, { search: "bei" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
     expect(filterVocabulary(entries, { search: "hello" }).map((entry) => entry.hanzi)).toEqual(["你好"]);
-    expect(filterVocabulary(entries, { search: "added-2026" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
+    expect(filterVocabulary(entries, { search: "ADDED-2026" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
   });
 
   test("matches pinyin when the search query omits spaces and tone marks", () => {
@@ -62,13 +62,13 @@ describe("filterVocabulary", () => {
     expect(filterVocabulary(entries, { hskLevel: "custom" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
     expect(filterVocabulary(entries, { source: "custom" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
     expect(filterVocabulary(entries, { lesson: "HSK:1.01" }).map((entry) => entry.hanzi)).toEqual(["你好"]);
-    expect(filterVocabulary(entries, { tag: "added-2026" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
+    expect(filterVocabulary(entries, { tag: "ADDED-2026" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
   });
 });
 
 describe("getDisplayTags", () => {
   test("generates HSK tags from level and lesson", () => {
-    expect(getDisplayTags(entries[0])).toEqual(["hsk1", "HSK1::HSK:1.01"]);
+    expect(getDisplayTags(entries[0])).toEqual(["HSK1", "HSK1::HSK:1.01"]);
   });
 
   test("generates custom and added-year tags without stored tags", () => {
@@ -76,6 +76,6 @@ describe("getDisplayTags", () => {
       getDisplayTags({
         ...entries[1],
       }),
-    ).toEqual(["hsk2", "custom", "added-2026"]);
+    ).toEqual(["HSK2", "CUSTOM", "ADDED-2026"]);
   });
 });

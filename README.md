@@ -12,6 +12,7 @@ The repository is the source of truth. Anki is the spaced-repetition target, upd
 - Add lesson vocabulary incrementally.
 - Validate entries before syncing.
 - Sync notes to Anki through AnkiConnect, without storing generated TSV exports.
+- Keep vocabulary in HSK3.0 nested Anki decks with a custom note type.
 
 ## Local Workflow
 
@@ -59,10 +60,19 @@ Current source files:
 `index.json` lists source files only. Counts are derived by the app.
 
 Vocabulary entries do not store tags. The app and Anki sync generate tags from `source`, `hsk_level`, `lesson`,
-and dates. HSK lesson tags follow the Anki hierarchy format, for example `hsk1` and `HSK1::HSK:1.09`.
+and dates. HSK lesson tags follow the Anki hierarchy format, for example `HSK1` and `HSK1::HSK:1.09`.
 Custom words use `source: "custom"`, an approximate `hsk_level`, and the year in `lesson`.
 
 `hsk-1.json` was populated from HSK Standard Course 1 pages 137-143.
+
+The current Anki target decks are:
+
+- `HSK3.0::HSK1`
+- `HSK3.0::HSK2`
+- `HSK3.0::CUSTOM`
+
+The sync creates or updates notes in the custom note type `Mandarin Vocabulary` and migrates matching legacy
+Chinese Support notes into those decks so existing review progress is preserved where possible.
 
 ## GitHub Pages
 

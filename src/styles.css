@@ -369,6 +369,7 @@ select {
 }
 
 .detail-dialog {
+  position: relative;
   width: min(720px, 100%);
   max-height: min(720px, calc(100vh - 36px));
   overflow: auto;
@@ -381,16 +382,20 @@ select {
 }
 
 .detail-header {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: block;
+  padding-right: 74px;
+  text-align: center;
+}
+
+.detail-title-block {
+  display: grid;
+  justify-items: center;
 }
 
 .detail-header h2 {
   margin: 0;
-  font-size: 3.2rem;
-  line-height: 1;
+  font-size: clamp(4.25rem, 12vw, 6.5rem);
+  line-height: 0.95;
 }
 
 .detail-header p {
@@ -405,10 +410,17 @@ select {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+  justify-content: center;
 }
 
 .detail-pinyin-row p {
   margin: 8px 0 0;
+}
+
+.detail-header .close-button {
+  position: absolute;
+  top: 22px;
+  right: 22px;
 }
 
 .meaning {

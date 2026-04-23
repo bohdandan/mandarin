@@ -2,11 +2,14 @@ import re
 import unittest
 
 from scripts.chinese_support import (
+    build_display_tone_fields,
     build_tone_fields,
+    bulk_latin_guide_syllables,
     chinese_advanced_back_template,
     primary_citation_pinyin,
     reconcile_generated_tags,
     updated_chinese_advanced_css,
+    written_chinese_footer_placeholder_html,
     written_chinese_url,
 )
 from scripts.vocabulary import strip_html
@@ -33,6 +36,14 @@ class ChineseSupportToneFieldTest(unittest.TestCase):
         self.assertIn("{{text:Hanzi}}", template)
         self.assertIn('class="meta-row"', template)
         self.assertNotIn(">Character breakdown<", template)
+
+    def test_written_chinese_footer_placeholder_keeps_footer_lane_without_link(self):
+        template = written_chinese_footer_placeholder_html()
+
+        self.assertIn('class="meta-row"', template)
+        self.assertIn('class="written-chinese-placeholder"', template)
+        self.assertNotIn('written-chinese-link', template)
+        self.assertNotIn("encodeURIComponent", template)
 
     def test_updated_chinese_advanced_css_uses_neutral_hanzi_and_footer_link_styles(self):
         original = (
@@ -71,6 +82,20 @@ class ChineseSupportToneFieldTest(unittest.TestCase):
         self.assertEqual(visible_text(compact["Pinyin"]), "yìqǐ")
         self.assertEqual(visible_text(spaced["Pinyin"]), "wèi shénme")
         self.assertEqual(visible_text(variant["Pinyin"]), "shàng/shang")
+
+    def test_build_display_tone_fields_with_bulk_guides_preserve_repo_display_formatting(self):
+        guides = bulk_latin_guide_syllables(["一起", "为什么", "上", "牛油果"])
+
+        compact = build_display_tone_fields("一起", "yìqǐ", guide_syllables=guides["一起"])
+        spaced = build_display_tone_fields("为什么", "wèi shénme", guide_syllables=guides["为什么"])
+        variant = build_display_tone_fields("上", "shàng/shang", guide_syllables=guides["上"])
+        custom = build_display_tone_fields("牛油果", "niúyóuguǒ", guide_syllables=guides["牛油果"])
+
+        self.assertEqual(visible_text(compact["Pinyin"]), "yìqǐ")
+        self.assertEqual(visible_text(spaced["Pinyin"]), "wèi shénme")
+        self.assertEqual(visible_text(variant["Pinyin"]), "shàng/shang")
+        self.assertEqual(visible_text(custom["Pinyin"]), "niúyóuguǒ")
+        self.assertIn('class="tone2"', custom["Color"])
 
     def test_reconcile_generated_tags_replaces_lowercase_variants(self):
         to_add, to_remove = reconcile_generated_tags(

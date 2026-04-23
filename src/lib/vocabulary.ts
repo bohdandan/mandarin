@@ -127,17 +127,17 @@ function addedYearTag(entry: VocabularyEntry): string {
   const lessonYear = entry.lesson.match(/^(\d{4})/)?.[1];
   const createdYear = entry.created_at.match(/^(\d{4})/)?.[1];
   const year = lessonYear ?? createdYear;
-  return year ? `added-${year}` : "";
+  return year ? `ADDED-${year}` : "";
 }
 
 export function getDisplayTags(entry: VocabularyEntry): string[] {
   const tags: string[] = [];
   if (entry.hsk_level !== null) {
-    tags.push(`hsk${entry.hsk_level}`);
+    tags.push(`HSK${entry.hsk_level}`);
   }
   tags.push(...parseHskLessonTags(entry.lesson));
   if (entry.source === "custom") {
-    tags.push("custom");
+    tags.push("CUSTOM");
     tags.push(addedYearTag(entry));
   }
   if (entry.lesson.startsWith("lesson-")) {

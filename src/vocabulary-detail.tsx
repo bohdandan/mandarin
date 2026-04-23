@@ -16,7 +16,7 @@ export function VocabularyDetailDialog({ entry, onClose }: VocabularyDetailDialo
       onClick={(event) => event.stopPropagation()}
     >
       <div className="detail-header">
-        <div>
+        <div className="detail-title-block">
           <h2 id="detail-title">{entry.hanzi}</h2>
           <div className="detail-pinyin-row">
             <p>{entry.pinyin}</p>
