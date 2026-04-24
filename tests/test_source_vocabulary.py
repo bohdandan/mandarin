@@ -84,11 +84,12 @@ class SourceVocabularyTest(unittest.TestCase):
         hsk2_lesson_tag = re.compile(r"^HSK2::HSK:2\.\d{2}$")
 
         self.assertIn({"source": "hsk-1", "file": "hsk-1.json"}, index["sources"])
-        self.assertEqual(len(hsk1_entries), 317)
+        self.assertEqual(len(hsk1_entries), 316)
         self.assertEqual(
             [entry["id"] for entry in hsk1_entries],
             [entry["id"] for entry in sorted(hsk1_entries, key=source_sort_key)],
         )
+        self.assertTrue(all(entry["english"] for entry in hsk1_entries))
         self.assertTrue(all(entry["example_sentence"] for entry in hsk1_entries))
 
         for entry in hsk1_entries:
@@ -115,6 +116,7 @@ class SourceVocabularyTest(unittest.TestCase):
             [entry["id"] for entry in hsk2_entries],
             [entry["id"] for entry in sorted(hsk2_entries, key=source_sort_key)],
         )
+        self.assertTrue(all(entry["english"] for entry in hsk2_entries))
         self.assertTrue(all(entry["example_sentence"] for entry in hsk2_entries))
 
         for entry in custom_entries:

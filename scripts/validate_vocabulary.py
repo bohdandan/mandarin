@@ -11,7 +11,7 @@ if __package__ in (None, ""):
 from scripts.vocabulary import earliest_hsk_lesson_sort_key, read_source_vocabulary, read_vocabulary, strip_html
 
 
-REQUIRED_FIELDS = ["id", "hanzi", "pinyin", "source", "created_at", "updated_at"]
+REQUIRED_FIELDS = ["id", "hanzi", "pinyin", "english", "source", "created_at", "updated_at"]
 
 
 def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
