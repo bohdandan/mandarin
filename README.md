@@ -4,6 +4,9 @@ A personal Mandarin vocabulary library for keeping lesson words clean, browsable
 
 The repository is the source of truth. Anki is the spaced-repetition target, updated through AnkiConnect.
 
+Editorial and maintenance rules for future vocabulary updates live in
+[`docs/vocabulary-editorial-rules.md`](docs/vocabulary-editorial-rules.md).
+
 ## Goals
 
 - Keep canonical vocabulary datasets in `data/sources/`, split by source.

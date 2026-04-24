@@ -26,6 +26,8 @@ HSK2_LESSON_ROWS = """
 车站	chēzhàn	2
 出国	chūguó	15
 出门	chūmén	15
+出	chū	3
+出来	chūlái	5
 出去	chūqù	3
 床	chuáng	6
 词	cí	10
@@ -61,6 +63,7 @@ HSK2_LESSON_ROWS = """
 还是	háishi	2,10
 黑色	hēisè	4
 红色	hóngsè	4
+红茶	hóngchá	5
 后面	hòumiàn	10
 花	huā	8,13
 画	huà	6
@@ -100,6 +103,7 @@ HSK2_LESSON_ROWS = """
 路上	lùshang	11
 旅游	lǚyóu	1
 绿色	lǜsè	4
+绿茶	lǜchá	5
 慢	màn	11
 没意思	méi yìsi	14
 每	měi	3
@@ -124,6 +128,7 @@ HSK2_LESSON_ROWS = """
 前面	qiánmiàn	14
 晴	qíng	12
 球	qiú	7
+起来	qǐlái	5
 让	ràng	1
 肉	ròu	6
 商场	shāngchǎng	4

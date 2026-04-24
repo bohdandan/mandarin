@@ -4,7 +4,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.vocabulary import build_entry, derive_tags, read_source_vocabulary, source_filename, write_source_vocabulary
+from scripts.vocabulary import (
+    build_entry,
+    derive_tags,
+    earliest_hsk_lesson_sort_key,
+    read_source_vocabulary,
+    source_sort_key,
+    source_filename,
+    write_source_vocabulary,
+)
 
 
 class SourceVocabularyTest(unittest.TestCase):
@@ -28,11 +36,17 @@ class SourceVocabularyTest(unittest.TestCase):
         self.assertEqual(source_filename("hsk-workbook"), "hsk-workbook.json")
         self.assertEqual(source_filename("Lesson April 19"), "lesson-april-19.json")
 
+    def test_extracts_earliest_hsk_lesson_sort_key(self):
+        self.assertEqual(earliest_hsk_lesson_sort_key("HSK:1.04"), (1, 4))
+        self.assertEqual(earliest_hsk_lesson_sort_key("HSK:1.09; HSK:1.14"), (1, 9))
+        self.assertIsNone(earliest_hsk_lesson_sort_key("2026"))
+
     def test_writes_index_and_one_json_file_per_source(self):
         entries = [
-            {"id": "1", "source": "hsk-workbook", "hsk_level": 1},
+            {"id": "1", "source": "hsk-workbook", "hsk_level": 1, "lesson": "HSK:1.03", "hanzi": "中"},
             {"id": "2", "source": "custom", "hsk_level": None},
-            {"id": "3", "source": "hsk-workbook", "hsk_level": 2},
+            {"id": "3", "source": "hsk-workbook", "hsk_level": 2, "lesson": "HSK:1.01", "hanzi": "啊"},
+            {"id": "4", "source": "hsk-workbook", "hsk_level": 1, "lesson": "HSK:1.01; HSK:1.08", "hanzi": "八"},
         ]
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -55,9 +69,9 @@ class SourceVocabularyTest(unittest.TestCase):
                     ]
                 },
             )
-            self.assertEqual([entry["id"] for entry in hsk], ["1", "3"])
+            self.assertEqual([entry["id"] for entry in hsk], ["4", "3", "1"])
             self.assertEqual([entry["id"] for entry in custom], ["2"])
-            self.assertEqual([entry["id"] for entry in round_trip], ["2", "1", "3"])
+            self.assertEqual([entry["id"] for entry in round_trip], ["2", "4", "3", "1"])
             self.assertFalse((output_dir / "stale.json").exists())
 
     def test_committed_sources_generate_anki_ready_tags(self):
@@ -71,6 +85,11 @@ class SourceVocabularyTest(unittest.TestCase):
 
         self.assertIn({"source": "hsk-1", "file": "hsk-1.json"}, index["sources"])
         self.assertEqual(len(hsk1_entries), 317)
+        self.assertEqual(
+            [entry["id"] for entry in hsk1_entries],
+            [entry["id"] for entry in sorted(hsk1_entries, key=source_sort_key)],
+        )
+        self.assertTrue(all(entry["example_sentence"] for entry in hsk1_entries))
 
         for entry in hsk1_entries:
             self.assertNotIn("tags", entry)
@@ -92,6 +111,11 @@ class SourceVocabularyTest(unittest.TestCase):
             self.assertTrue(tags)
             self.assertEqual(tags[0], "HSK2")
             self.assertTrue(all(tag == "HSK2" or hsk2_lesson_tag.match(tag) for tag in tags))
+        self.assertEqual(
+            [entry["id"] for entry in hsk2_entries],
+            [entry["id"] for entry in sorted(hsk2_entries, key=source_sort_key)],
+        )
+        self.assertTrue(all(entry["example_sentence"] for entry in hsk2_entries))
 
         for entry in custom_entries:
             self.assertNotIn("tags", entry)

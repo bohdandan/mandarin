@@ -8,7 +8,7 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.vocabulary import read_source_vocabulary, read_vocabulary
+from scripts.vocabulary import earliest_hsk_lesson_sort_key, read_source_vocabulary, read_vocabulary, strip_html
 
 
 REQUIRED_FIELDS = ["id", "hanzi", "pinyin", "source", "created_at", "updated_at"]
@@ -18,6 +18,8 @@ def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
     errors: list[str] = []
     seen_ids: set[str] = set()
     seen_words: set[tuple[str, str]] = set()
+    seen_examples: set[tuple[str, str]] = set()
+    previous_hsk_sort_key: tuple[int, int, str, str] | None = None
 
     for index, entry in enumerate(entries, start=1):
         label = entry.get("id") or f"row {index}"
@@ -42,6 +44,30 @@ def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
         hsk_level = entry.get("hsk_level")
         if hsk_level is not None and (not isinstance(hsk_level, int) or hsk_level < 1):
             errors.append(f"{label}: hsk_level must be a positive integer or null")
+
+        source = str(entry.get("source") or "")
+        example_sentence = str(entry.get("example_sentence") or "")
+        normalized_example = strip_html(example_sentence)
+        if source.startswith("hsk-"):
+            if not normalized_example:
+                errors.append(f"{label}: missing example_sentence for HSK source")
+            else:
+                example_key = (source, normalized_example)
+                if example_key in seen_examples:
+                    errors.append(f"{label}: duplicate example_sentence in {source}")
+                seen_examples.add(example_key)
+
+            earliest_lesson = earliest_hsk_lesson_sort_key(str(entry.get("lesson") or ""))
+            if earliest_lesson is not None:
+                sort_key = (
+                    earliest_lesson[0],
+                    earliest_lesson[1],
+                    str(entry.get("hanzi") or ""),
+                    str(entry.get("id") or ""),
+                )
+                if previous_hsk_sort_key is not None and sort_key < previous_hsk_sort_key:
+                    errors.append(f"{label}: out of lesson order")
+                previous_hsk_sort_key = sort_key
 
     return errors
 

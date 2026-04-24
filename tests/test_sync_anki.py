@@ -66,19 +66,19 @@ class SyncAnkiTest(unittest.TestCase):
 
         self.assertEqual(query, 'note:"Mandarin Vocabulary" "Vocabulary ID:hsk2-0200-shou-biao"')
 
-    def test_templates_keep_footer_row_in_same_lane_on_front_and_back(self):
+    def test_templates_keep_single_meta_footer_lane_on_front_and_back(self):
         templates = mandarin_vocabulary_templates()
 
         for card_name in ("Recognition", "Recall"):
             front = templates[card_name]["Front"]
             back = templates[card_name]["Back"]
 
-            self.assertIn('class="card-footer"', front)
-            self.assertIn('class="card-footer"', back)
             self.assertIn('class="meta-row"', front)
             self.assertIn('class="meta-row"', back)
             self.assertIn('class="written-chinese-placeholder"', front)
             self.assertIn('class="written-chinese-link"', back)
+            self.assertNotIn('class="card-footer"', front)
+            self.assertNotIn('class="card-footer"', back)
 
     def test_templates_keep_anki_placeholders_escaped_after_footer_injection(self):
         templates = mandarin_vocabulary_templates()

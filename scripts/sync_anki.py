@@ -212,11 +212,6 @@ def mandarin_vocabulary_css() -> str:
   justify-content: flex-start;
 }
 
-.card-footer {
-  margin-top: auto;
-  padding-top: 12px;
-}
-
 .tone1 { color: #0077b6; }
 .tone2 { color: #2b9348; }
 .tone3 { color: #c05600; }
@@ -232,15 +227,18 @@ def mandarin_vocabulary_css() -> str:
 .meta-row {
   display: flex;
   gap: 12px;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  margin-top: 20px;
+  margin-top: auto;
+  padding-top: 10px;
 }
 
 .meta-row .tags {
   flex: 1;
   margin-top: 0;
   text-align: left;
+  font-size: 8.5pt;
+  opacity: 0.55;
 }
 
 .written-chinese-link {
@@ -284,12 +282,8 @@ def mandarin_vocabulary_css() -> str:
     margin: 12px 0;
   }
 
-  .card-footer {
-    padding-top: 8px;
-  }
-
   .meta-row {
-    margin-top: 10px;
+    padding-top: 8px;
   }
 }
 """.strip()
@@ -309,9 +303,6 @@ def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
   </div>
 
   <hr class="divider">
-</div>
-
-<div class="card-footer">
   {placeholder_footer}
 </div>
 """.strip(),
@@ -332,9 +323,6 @@ def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
     <div class="comment">{{{{Example Sentence}}}}</div>
     {{{{/Example Sentence}}}}
   </div>
-</div>
-
-<div class="card-footer">
   {back_footer}
 </div>
 """.strip(),
@@ -352,9 +340,6 @@ def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
     <div class="pinyin">&nbsp;</div>
     <div class="chinese">{{{{Silhouette}}}}</div>
   </div>
-</div>
-
-<div class="card-footer">
   {placeholder_footer}
 </div>
 """.strip(),
@@ -375,9 +360,6 @@ def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
   </div>
 
   <div class="sound">{{{{Sound}}}}</div>
-</div>
-
-<div class="card-footer">
   {back_footer}
 </div>
 """.strip(),

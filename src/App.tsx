@@ -10,8 +10,6 @@ import {
 } from "./lib/vocabulary";
 import { VocabularyDetailDialog } from "./vocabulary-detail";
 
-const imageUrl = "https://commons.wikimedia.org/wiki/Special:FilePath/Chinese_Brush_for_Writing_Calligraphy.jpg?width=1200";
-
 type SourceIndex = {
   sources: { source: string; file: string }[];
 };
@@ -110,7 +108,7 @@ function App() {
       <section className="library-header" aria-labelledby="page-title">
         <div className="header-copy">
           <div className="topline">
-            <p className="eyebrow">普通话词汇</p>
+            <h1 id="page-title">普通话词汇</h1>
             <button
               aria-label={theme === "dracula" ? "Switch to light theme" : "Switch to Dracula theme"}
               className="theme-toggle"
@@ -121,7 +119,6 @@ function App() {
               <span aria-hidden="true">{theme === "dracula" ? "☀" : "☾"}</span>
             </button>
           </div>
-          <h1 id="page-title">复习 words that are ready for Anki.</h1>
           <div className="search-row">
             <label className="search-label" htmlFor="search">
               Search
@@ -135,15 +132,6 @@ function App() {
             />
           </div>
         </div>
-        <figure className="header-image">
-          <img src={imageUrl} alt="Chinese calligraphy brush resting on paper" />
-          <figcaption>
-            Image:{" "}
-            <a href="https://commons.wikimedia.org/wiki/File:Chinese_Brush_for_Writing_Calligraphy.jpg">
-              epSos.de, CC BY 2.0
-            </a>
-          </figcaption>
-        </figure>
       </section>
 
       <section className="summary-line" aria-label="Vocabulary summary">

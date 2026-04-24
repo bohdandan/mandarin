@@ -81,6 +81,13 @@ def parse_hsk_lesson_tags(value: str) -> list[str]:
     return unique_ordered(tags)
 
 
+def earliest_hsk_lesson_sort_key(value: str) -> tuple[int, int] | None:
+    lessons: list[tuple[int, int]] = []
+    for match in re.finditer(r"HSK:(\d+)\.(\d+)", value):
+        lessons.append((int(match.group(1)), int(match.group(2))))
+    return min(lessons) if lessons else None
+
+
 def added_year_tag(created_at: str) -> str:
     match = re.match(r"^(\d{4})", created_at)
     return f"ADDED-{match.group(1)}" if match else ""
@@ -182,7 +189,11 @@ def source_filename(source: str) -> str:
 
 
 def source_sort_key(entry: dict[str, Any]) -> tuple[bool, int, str]:
-    return (entry.get("hsk_level") is None, entry.get("hsk_level") or 99, entry["id"])
+    earliest_lesson = earliest_hsk_lesson_sort_key(str(entry.get("lesson") or ""))
+    if earliest_lesson is not None:
+        lesson_level, lesson_number = earliest_lesson
+        return (False, lesson_level * 100 + lesson_number, str(entry.get("hanzi") or ""), entry["id"])
+    return (entry.get("hsk_level") is None, (entry.get("hsk_level") or 99) * 100, str(entry.get("hanzi") or ""), entry["id"])
 
 
 def entry_without_generated_fields(entry: dict[str, Any]) -> dict[str, Any]:
