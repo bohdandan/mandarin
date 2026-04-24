@@ -27,6 +27,10 @@ def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
             if entry.get(field) in (None, ""):
                 errors.append(f"{label}: missing {field}")
 
+        english = str(entry.get("english") or "")
+        if strip_html(english) != english:
+            errors.append(f"{label}: english must not contain HTML")
+
         entry_id = str(entry.get("id", ""))
         if entry_id in seen_ids:
             errors.append(f"duplicate id {entry_id}")

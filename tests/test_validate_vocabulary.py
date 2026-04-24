@@ -24,6 +24,26 @@ class ValidateVocabularyTest(unittest.TestCase):
 
         self.assertIn("hsk1-0001-ni: missing english", errors)
 
+    def test_entries_reject_html_in_english(self):
+        entries = [
+            {
+                "id": "hsk1-0001-yi",
+                "hanzi": "一",
+                "pinyin": "yī",
+                "english": "one<br>as soon as",
+                "source": "hsk-1",
+                "hsk_level": 1,
+                "lesson": "HSK:1.01",
+                "example_sentence": "我有<b>一</b>个弟弟。",
+                "created_at": "2026-04-24",
+                "updated_at": "2026-04-24",
+            }
+        ]
+
+        errors = validate_entries(entries)
+
+        self.assertIn("hsk1-0001-yi: english must not contain HTML", errors)
+
     def test_hsk_entries_require_example_sentences(self):
         entries = [
             {
