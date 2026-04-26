@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock
 
 from scripts.sync_anki import (
     ANKI_FIELDS,
@@ -7,11 +8,39 @@ from scripts.sync_anki import (
     duplicate_query,
     mandarin_vocabulary_css,
     mandarin_vocabulary_templates,
+    resolve_sound_ref,
 )
 from scripts.vocabulary import strip_html
 
 
 class SyncAnkiTest(unittest.TestCase):
+    def test_resolve_sound_ref_generates_audio_for_custom_entries_without_sound(self):
+        entry = {"id": "custom-word-xinwen", "hanzi": "新闻", "source": "custom"}
+        generator = Mock(return_value="[sound:custom-word-xinwen_google-cmn-cn-wavenet-c.mp3]")
+
+        sound = resolve_sound_ref(entry, "", generator)
+
+        self.assertEqual(sound, "[sound:custom-word-xinwen_google-cmn-cn-wavenet-c.mp3]")
+        generator.assert_called_once_with(entry)
+
+    def test_resolve_sound_ref_keeps_existing_sound_for_custom_entries(self):
+        entry = {"id": "custom-word-xinwen", "hanzi": "新闻", "source": "custom"}
+        generator = Mock()
+
+        sound = resolve_sound_ref(entry, "[sound:existing.mp3]", generator)
+
+        self.assertEqual(sound, "[sound:existing.mp3]")
+        generator.assert_not_called()
+
+    def test_resolve_sound_ref_does_not_generate_audio_for_non_custom_entries(self):
+        entry = {"id": "hsk1-0001-ai", "hanzi": "爱", "source": "hsk-1"}
+        generator = Mock()
+
+        sound = resolve_sound_ref(entry, "", generator)
+
+        self.assertEqual(sound, "")
+        generator.assert_not_called()
+
     def test_builds_hsk_note_with_generated_display_fields_and_hsk30_deck(self):
         entry = {
             "id": "hsk2-0200-shou-biao",

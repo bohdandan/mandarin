@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
+import os
 import sys
 import urllib.request
 from pathlib import Path
@@ -18,12 +20,14 @@ from scripts.chinese_support import (
     written_chinese_footer_html,
     written_chinese_footer_placeholder_html,
 )
+from scripts.google_tts import load_google_tts_config, synthesize_audio
 from scripts.vocabulary import derive_tags, pinyin_slug, read_source_vocabulary, read_vocabulary, strip_html
 
 
 ANKI_CONNECT_URL = "http://127.0.0.1:8765"
 DEFAULT_DECK_PREFIX = "HSK3.0"
 DEFAULT_MODEL = "Mandarin Vocabulary"
+DEFAULT_GOOGLE_TTS_VOICE = "cmn-CN-Wavenet-C"
 LEGACY_MODEL = "Chinese (Advanced)"
 LEGACY_DECKS = ("HSK [Chinese Support]::HSK1-4", "HSK [Chinese Support]::Custom")
 
@@ -98,6 +102,25 @@ def build_anki_note(
         "tags": anki_tags(entry),
         "options": {"allowDuplicate": False, "duplicateScope": "deck"},
     }
+
+
+def generate_sound_ref(entry: dict[str, Any], config: Any) -> str:
+    filename, audio_bytes = synthesize_audio(entry, config)
+    payload = base64.b64encode(audio_bytes).decode("ascii")
+    invoke_anki("storeMediaFile", {"filename": filename, "data": payload})
+    return f"[sound:{filename}]"
+
+
+def resolve_sound_ref(
+    entry: dict[str, Any],
+    current_sound: str,
+    sound_generator: Any,
+) -> str:
+    if str(current_sound or "").strip():
+        return current_sound
+    if str(entry.get("source") or "") != "custom":
+        return current_sound
+    return sound_generator(entry)
 
 
 def duplicate_query(vocabulary_id: str, model_name: str) -> str:
@@ -481,6 +504,15 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
     summary = {"added": 0, "migrated": 0, "updated": 0, "unchanged": 0}
     pending_actions: list[dict[str, Any]] = []
     guide_map = bulk_latin_guide_syllables([str(entry.get("hanzi") or "") for entry in entries])
+    tts_config: Any | None = None
+
+    def custom_sound_generator(entry: dict[str, Any]) -> str:
+        nonlocal tts_config
+        if tts_config is None:
+            env = dict(os.environ)
+            env.setdefault("GOOGLE_TTS_VOICE_NAME", DEFAULT_GOOGLE_TTS_VOICE)
+            tts_config = load_google_tts_config(env)
+        return generate_sound_ref(entry, tts_config)
 
     if not dry_run:
         ensure_model(model_name)
@@ -510,9 +542,10 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
             enriched_entry = dict(entry)
             if not enriched_entry.get("example_sentence") and existing_example:
                 enriched_entry["example_sentence"] = existing_example
+            resolved_sound = resolve_sound_ref(entry, note_field_value(existing, "Sound"), custom_sound_generator)
             desired_fields = entry_fields(
                 enriched_entry,
-                sound_ref=note_field_value(existing, "Sound"),
+                sound_ref=resolved_sound,
                 guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
             )
             if current_fields == desired_fields and existing.get("tags", []) == desired_tags:
@@ -546,7 +579,7 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                                 "modelName": model_name,
                                 "fields": entry_fields(
                                     enriched_entry,
-                                    sound_ref=note_field_value(legacy, "Sound"),
+                                    sound_ref=resolve_sound_ref(entry, note_field_value(legacy, "Sound"), custom_sound_generator),
                                     guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
                                 ),
                                 "tags": anki_tags(entry),
@@ -569,6 +602,7 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                     "note": build_anki_note(
                         entry,
                         model_name=model_name,
+                        sound_ref=resolve_sound_ref(entry, "", custom_sound_generator),
                         guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
                     )
                 },
