@@ -1723,5 +1723,20 @@
     "notes": "",
     "created_at": "2026-04-29",
     "updated_at": "2026-04-29"
+  },
+  {
+    "id": "custom-word-yinyue",
+    "hanzi": "音乐",
+    "pinyin": "yīnyuè",
+    "english": "music",
+    "example_sentence": "我每天都听<b>音乐</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 2,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-03",
+    "updated_at": "2026-05-03"
   }
 ]
