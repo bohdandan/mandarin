@@ -118,8 +118,6 @@ def resolve_sound_ref(
 ) -> str:
     if str(current_sound or "").strip():
         return current_sound
-    if str(entry.get("source") or "") != "custom":
-        return current_sound
     return sound_generator(entry)
 
 

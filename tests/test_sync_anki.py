@@ -32,14 +32,14 @@ class SyncAnkiTest(unittest.TestCase):
         self.assertEqual(sound, "[sound:existing.mp3]")
         generator.assert_not_called()
 
-    def test_resolve_sound_ref_does_not_generate_audio_for_non_custom_entries(self):
+    def test_resolve_sound_ref_generates_audio_for_non_custom_entries_without_sound(self):
         entry = {"id": "hsk1-0001-ai", "hanzi": "爱", "source": "hsk-1"}
-        generator = Mock()
+        generator = Mock(return_value="[sound:hsk1-0001-ai_google-cmn-cn-wavenet-c.mp3]")
 
         sound = resolve_sound_ref(entry, "", generator)
 
-        self.assertEqual(sound, "")
-        generator.assert_not_called()
+        self.assertEqual(sound, "[sound:hsk1-0001-ai_google-cmn-cn-wavenet-c.mp3]")
+        generator.assert_called_once_with(entry)
 
     def test_builds_hsk_note_with_generated_display_fields_and_hsk30_deck(self):
         entry = {

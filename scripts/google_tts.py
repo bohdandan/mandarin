@@ -7,6 +7,7 @@ import re
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -106,11 +107,8 @@ def google_media_filename(entry: dict[str, Any], config: GoogleTtsConfig) -> str
     return f"{entry['id']}_google-{voice_slug}.{extension}"
 
 
-def google_access_token(adc_credentials: Mapping[str, str] | None = None) -> str:
-    adc = adc_credentials if adc_credentials is not None else load_adc_credentials()
-    refresh_token = str(adc.get("refresh_token") or "").strip()
-    client_id = str(adc.get("client_id") or "").strip()
-    client_secret = str(adc.get("client_secret") or "").strip()
+@lru_cache(maxsize=8)
+def _google_access_token_cached(refresh_token: str, client_id: str, client_secret: str) -> str:
     if not refresh_token or not client_id or not client_secret:
         raise RuntimeError("Google ADC credentials are incomplete. Re-run `gcloud auth application-default login`.")
 
@@ -133,6 +131,14 @@ def google_access_token(adc_credentials: Mapping[str, str] | None = None) -> str
     if not token:
         raise RuntimeError("Google ADC is configured, but no access token was returned.")
     return token
+
+
+def google_access_token(adc_credentials: Mapping[str, str] | None = None) -> str:
+    adc = adc_credentials if adc_credentials is not None else load_adc_credentials()
+    refresh_token = str(adc.get("refresh_token") or "").strip()
+    client_id = str(adc.get("client_id") or "").strip()
+    client_secret = str(adc.get("client_secret") or "").strip()
+    return _google_access_token_cached(refresh_token, client_id, client_secret)
 
 
 def synthesize_audio(entry: dict[str, Any], config: GoogleTtsConfig) -> tuple[str, bytes]:

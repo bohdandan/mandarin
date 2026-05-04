@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import unittest
+from unittest.mock import patch
 
 from scripts.google_tts import (
     GoogleTtsConfig,
@@ -54,6 +56,43 @@ class GoogleTtsTests(unittest.TestCase):
             google_media_filename(entry, config),
             "custom-word_google-cmn-cn-wavenet-a.mp3",
         )
+
+    def test_google_access_token_reuses_token_with_same_adc_credentials(self) -> None:
+        import scripts.google_tts as google_tts
+
+        google_tts._google_access_token_cached.cache_clear()
+        calls: list[str] = []
+
+        class FakeResponse:
+            def __init__(self, payload: dict[str, str]) -> None:
+                self.payload = json.dumps(payload).encode("utf-8")
+
+            def read(self) -> bytes:
+                return self.payload
+
+            def __enter__(self) -> "FakeResponse":
+                return self
+
+            def __exit__(self, exc_type, exc, tb) -> None:
+                return None
+
+        def fake_urlopen(request, timeout=30):  # type: ignore[no-untyped-def]
+            calls.append(request.full_url)
+            return FakeResponse({"access_token": "token-123"})
+
+        adc = {
+            "refresh_token": "refresh",
+            "client_id": "client",
+            "client_secret": "secret",
+        }
+
+        with patch("scripts.google_tts.urllib.request.urlopen", side_effect=fake_urlopen):
+            first = google_tts.google_access_token(adc)
+            second = google_tts.google_access_token(adc)
+
+        self.assertEqual(first, "token-123")
+        self.assertEqual(second, "token-123")
+        self.assertEqual(calls, [google_tts.GOOGLE_TOKEN_URL])
 
 
 if __name__ == "__main__":
