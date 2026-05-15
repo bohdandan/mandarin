@@ -3780,21 +3780,6 @@
     "updated_at": "2026-04-19"
   },
   {
-    "id": "hsk1-0258-yao",
-    "hanzi": "药",
-    "pinyin": "yào",
-    "english": "medicine / drug",
-    "example_sentence": "医生给我开了<b>药</b>。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 1,
-    "source": "hsk-1",
-    "lesson": "HSK:1.12",
-    "notes": "Marked beyond the syllabus for this level in HSK Standard Course 1.",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
-  },
-  {
     "id": "hsk1-0100-jue-de",
     "hanzi": "觉得",
     "pinyin": "jué de",
@@ -4661,21 +4646,6 @@
     "source": "hsk-1",
     "lesson": "HSK:1.15",
     "notes": "",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
-  },
-  {
-    "id": "hsk1-0085-ji-chang",
-    "hanzi": "机场",
-    "pinyin": "jī chǎng",
-    "english": "airport",
-    "example_sentence": "我爸爸在<b>机场</b>工作。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 1,
-    "source": "hsk-1",
-    "lesson": "HSK:1.15",
-    "notes": "Marked beyond the syllabus for this level in HSK Standard Course 1.",
     "created_at": "2026-04-19",
     "updated_at": "2026-04-19"
   },

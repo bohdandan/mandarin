@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -8,16 +9,27 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.vocabulary import earliest_hsk_lesson_sort_key, read_source_vocabulary, read_vocabulary, strip_html
+from scripts.vocabulary import earliest_hsk_lesson_sort_key, pinyin_slug, read_source_vocabulary, read_vocabulary, strip_html
 
 
 REQUIRED_FIELDS = ["id", "hanzi", "pinyin", "english", "source", "created_at", "updated_at"]
+
+
+def normalize_english_gloss(value: str) -> str:
+    normalized = strip_html(value).lower()
+    normalized = re.sub(r"[^a-z0-9]+", " ", normalized)
+    return " ".join(normalized.split())
+
+
+def normalize_pinyin_key(value: str) -> str:
+    return pinyin_slug(value).replace("-", "")
 
 
 def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
     errors: list[str] = []
     seen_ids: set[str] = set()
     seen_words: set[tuple[str, str]] = set()
+    seen_semantic_words: set[tuple[str, str, str]] = set()
     seen_examples: set[tuple[str, str]] = set()
     previous_hsk_sort_key: tuple[int, int, str, str] | None = None
 
@@ -41,6 +53,18 @@ def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
             if word_key in seen_words:
                 errors.append(f"duplicate hanzi/pinyin {word_key[0]} / {word_key[1]}")
             seen_words.add(word_key)
+
+        semantic_key = (
+            str(entry.get("hanzi", "")),
+            normalize_pinyin_key(str(entry.get("pinyin", ""))),
+            normalize_english_gloss(str(entry.get("english", ""))),
+        )
+        if all(semantic_key):
+            if semantic_key in seen_semantic_words:
+                errors.append(
+                    f"{label}: duplicate semantic entry {semantic_key[0]} / {semantic_key[1]} / {semantic_key[2]}"
+                )
+            seen_semantic_words.add(semantic_key)
 
         if "tags" in entry:
             errors.append(f"{label}: tags are generated from source, hsk_level, lesson, and dates")

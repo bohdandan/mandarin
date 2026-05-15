@@ -1783,5 +1783,35 @@
     "notes": "",
     "created_at": "2026-04-24",
     "updated_at": "2026-04-24"
+  },
+  {
+    "id": "custom-word-jizhu",
+    "hanzi": "记住",
+    "pinyin": "jìzhu",
+    "english": "to remember",
+    "example_sentence": "我会<b>记住</b>这个名字。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 4,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-15",
+    "updated_at": "2026-05-15"
+  },
+  {
+    "id": "custom-word-biaoxian",
+    "hanzi": "表现",
+    "pinyin": "biǎoxiàn",
+    "english": "performance / to show",
+    "example_sentence": "她今天的<b>表现</b>很好。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-15",
+    "updated_at": "2026-05-15"
   }
 ]
