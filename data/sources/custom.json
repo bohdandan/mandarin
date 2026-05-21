@@ -165,6 +165,21 @@
     "updated_at": "2026-04-29"
   },
   {
+    "id": "custom-word-ku",
+    "hanzi": "哭",
+    "pinyin": "kū",
+    "english": "to cry",
+    "example_sentence": "孩子饿了就会<b>哭</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 2,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-21",
+    "updated_at": "2026-05-21"
+  },
+  {
     "id": "custom-word-changge",
     "hanzi": "唱歌",
     "pinyin": "chànggē",
@@ -313,6 +328,21 @@
     "notes": "",
     "created_at": "2026-04-19",
     "updated_at": "2026-04-19"
+  },
+  {
+    "id": "custom-word-xi-lian",
+    "hanzi": "洗脸",
+    "pinyin": "xǐ liǎn",
+    "english": "to wash one's face",
+    "example_sentence": "我早上先<b>洗脸</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 2,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-21",
+    "updated_at": "2026-05-21"
   },
   {
     "id": "custom-word-ranhou",
@@ -840,6 +870,21 @@
     "updated_at": "2026-04-24"
   },
   {
+    "id": "custom-word-huodong",
+    "hanzi": "活动",
+    "pinyin": "huódòng",
+    "english": "activity / event",
+    "example_sentence": "学校今天有很多<b>活动</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 3,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
     "id": "custom-word-wanju",
     "hanzi": "玩具",
     "pinyin": "wánjù",
@@ -943,6 +988,21 @@
     "notes": "",
     "created_at": "2026-04-24",
     "updated_at": "2026-04-24"
+  },
+  {
+    "id": "custom-word-congming",
+    "hanzi": "聪明",
+    "pinyin": "cōngming",
+    "english": "smart / clever",
+    "example_sentence": "她很<b>聪明</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 3,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-21",
+    "updated_at": "2026-05-21"
   },
   {
     "id": "custom-word-zixingche",
@@ -1335,6 +1395,21 @@
     "updated_at": "2026-04-24"
   },
   {
+    "id": "custom-word-jiaxiang",
+    "hanzi": "家乡",
+    "pinyin": "jiāxiāng",
+    "english": "hometown",
+    "example_sentence": "我的<b>家乡</b>很漂亮。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 4,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
     "id": "custom-word-sushe",
     "hanzi": "宿舍",
     "pinyin": "sùshè",
@@ -1380,6 +1455,21 @@
     "updated_at": "2026-04-24"
   },
   {
+    "id": "custom-word-xingge",
+    "hanzi": "性格",
+    "pinyin": "xìnggé",
+    "english": "personality",
+    "example_sentence": "她的<b>性格</b>很开朗。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 4,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
     "id": "custom-word-gua-dianhua",
     "hanzi": "挂电话",
     "pinyin": "guà diànhuà",
@@ -1393,6 +1483,21 @@
     "notes": "",
     "created_at": "2026-04-24",
     "updated_at": "2026-04-24"
+  },
+  {
+    "id": "custom-word-wenhua",
+    "hanzi": "文化",
+    "pinyin": "wénhuà",
+    "english": "culture",
+    "example_sentence": "我对中国<b>文化</b>很感兴趣。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 4,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
   },
   {
     "id": "custom-word-wuliao",
@@ -1620,6 +1725,36 @@
     "updated_at": "2026-04-19"
   },
   {
+    "id": "custom-word-jizhu",
+    "hanzi": "记住",
+    "pinyin": "jìzhu",
+    "english": "to remember",
+    "example_sentence": "我会<b>记住</b>这个名字。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 4,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-15",
+    "updated_at": "2026-05-15"
+  },
+  {
+    "id": "custom-word-jiang-gushi",
+    "hanzi": "讲故事",
+    "pinyin": "jiǎng gùshi",
+    "english": "to tell stories",
+    "example_sentence": "妈妈晚上给我<b>讲故事</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 4,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-21",
+    "updated_at": "2026-05-21"
+  },
+  {
     "id": "custom-word-tongchang",
     "hanzi": "通常",
     "pinyin": "tōngcháng",
@@ -1680,6 +1815,81 @@
     "updated_at": "2026-04-24"
   },
   {
+    "id": "custom-word-leguan",
+    "hanzi": "乐观",
+    "pinyin": "lèguān",
+    "english": "optimistic",
+    "example_sentence": "他一直很<b>乐观</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
+    "id": "custom-word-xingqu-aihao",
+    "hanzi": "兴趣爱好",
+    "pinyin": "xìngqù àihào",
+    "english": "interests / hobbies",
+    "example_sentence": "你的<b>兴趣爱好</b>是什么？",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
+    "id": "custom-word-baokuo",
+    "hanzi": "包括",
+    "pinyin": "bāokuò",
+    "english": "to include",
+    "example_sentence": "这个价格<b>包括</b>晚饭。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
+    "id": "custom-word-danao",
+    "hanzi": "大脑",
+    "pinyin": "dànǎo",
+    "english": "brain",
+    "example_sentence": "睡觉对<b>大脑</b>很好。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
+    "id": "custom-word-kailang",
+    "hanzi": "开朗",
+    "pinyin": "kāilǎng",
+    "english": "cheerful / outgoing",
+    "example_sentence": "她是一个很<b>开朗</b>的人。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
     "id": "custom-word-gongxi-facai",
     "hanzi": "恭喜发财",
     "pinyin": "gōngxǐ fācái",
@@ -1693,6 +1903,21 @@
     "notes": "",
     "created_at": "2026-04-24",
     "updated_at": "2026-04-24"
+  },
+  {
+    "id": "custom-word-chengyuan",
+    "hanzi": "成员",
+    "pinyin": "chéngyuán",
+    "english": "member",
+    "example_sentence": "他是我们队的<b>成员</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
   },
   {
     "id": "custom-word-pisadao",
@@ -1710,6 +1935,36 @@
     "updated_at": "2026-04-24"
   },
   {
+    "id": "custom-word-liulian",
+    "hanzi": "榴莲",
+    "pinyin": "liúlián",
+    "english": "durian",
+    "example_sentence": "我第一次吃<b>榴莲</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
+    "id": "custom-word-juse",
+    "hanzi": "橘色",
+    "pinyin": "júsè",
+    "english": "orange color",
+    "example_sentence": "她今天穿了<b>橘色</b>的衣服。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
     "id": "custom-word-tangshao",
     "hanzi": "汤勺",
     "pinyin": "tāngsháo",
@@ -1723,6 +1978,21 @@
     "notes": "",
     "created_at": "2026-04-24",
     "updated_at": "2026-04-24"
+  },
+  {
+    "id": "custom-word-techang",
+    "hanzi": "特长",
+    "pinyin": "tècháng",
+    "english": "strong point / special skill",
+    "example_sentence": "唱歌是我的<b>特长</b>。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
   },
   {
     "id": "custom-word-tianpincha",
@@ -1755,6 +2025,21 @@
     "updated_at": "2026-04-24"
   },
   {
+    "id": "custom-word-kongxian-shijian",
+    "hanzi": "空闲时间",
+    "pinyin": "kòngxián shíjiān",
+    "english": "free time",
+    "example_sentence": "我<b>空闲时间</b>喜欢看书。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
+  },
+  {
     "id": "custom-word-chachi",
     "hanzi": "茶匙",
     "pinyin": "cháchí",
@@ -1768,6 +2053,36 @@
     "notes": "",
     "created_at": "2026-04-24",
     "updated_at": "2026-04-24"
+  },
+  {
+    "id": "custom-word-biaoxian",
+    "hanzi": "表现",
+    "pinyin": "biǎoxiàn",
+    "english": "performance / to show",
+    "example_sentence": "她今天的<b>表现</b>很好。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-15",
+    "updated_at": "2026-05-15"
+  },
+  {
+    "id": "custom-word-jiejue-wenti",
+    "hanzi": "解决问题",
+    "pinyin": "jiějué wèntí",
+    "english": "to solve problems",
+    "example_sentence": "我们一起<b>解决问题</b>吧。",
+    "sentence_pinyin": "",
+    "sentence_translation": "",
+    "hsk_level": 5,
+    "source": "custom",
+    "lesson": "2026",
+    "notes": "",
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
   },
   {
     "id": "custom-word-huangyoudao",
@@ -1785,33 +2100,18 @@
     "updated_at": "2026-04-24"
   },
   {
-    "id": "custom-word-jizhu",
-    "hanzi": "记住",
-    "pinyin": "jìzhu",
-    "english": "to remember",
-    "example_sentence": "我会<b>记住</b>这个名字。",
+    "id": "custom-word-youjiu",
+    "hanzi": "悠久",
+    "pinyin": "yōujiǔ",
+    "english": "long-standing / ancient",
+    "example_sentence": "这座城市有<b>悠久</b>的历史。",
     "sentence_pinyin": "",
     "sentence_translation": "",
-    "hsk_level": 4,
+    "hsk_level": 6,
     "source": "custom",
     "lesson": "2026",
     "notes": "",
-    "created_at": "2026-05-15",
-    "updated_at": "2026-05-15"
-  },
-  {
-    "id": "custom-word-biaoxian",
-    "hanzi": "表现",
-    "pinyin": "biǎoxiàn",
-    "english": "performance / to show",
-    "example_sentence": "她今天的<b>表现</b>很好。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 5,
-    "source": "custom",
-    "lesson": "2026",
-    "notes": "",
-    "created_at": "2026-05-15",
-    "updated_at": "2026-05-15"
+    "created_at": "2026-05-18",
+    "updated_at": "2026-05-18"
   }
 ]
