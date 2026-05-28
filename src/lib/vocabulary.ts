@@ -140,6 +140,12 @@ export function getDisplayTags(entry: VocabularyEntry): string[] {
     tags.push("CUSTOM");
     tags.push(addedYearTag(entry));
   }
+  if (entry.source === "Pursuit of Jade") {
+    const episodeMatch = entry.lesson.trim().match(/^E(\d+)$/i);
+    if (episodeMatch) {
+      tags.push(`poj-${Number(episodeMatch[1])}`);
+    }
+  }
   if (entry.lesson.startsWith("lesson-")) {
     tags.push(entry.lesson);
   }

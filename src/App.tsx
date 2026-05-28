@@ -22,6 +22,17 @@ function levelLabel(level: string): string {
   return level === "custom" ? "Custom" : `HSK ${level}`;
 }
 
+function entryLevelLabel(entry: VocabularyEntry): string {
+  const level = entry.hsk_level ? `HSK ${entry.hsk_level}` : "HSK ?";
+  if (entry.source === "custom") {
+    return `Custom · ${level}`;
+  }
+  if (entry.source !== `hsk-${entry.hsk_level}`) {
+    return `${entry.source} · ${level}`;
+  }
+  return level;
+}
+
 function App() {
   const [entries, setEntries] = useState<VocabularyEntry[]>([]);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
@@ -249,13 +260,7 @@ function App() {
             <span className="row-pinyin">{entry.pinyin}</span>
             <span className="row-meaning">{entry.english}</span>
             <span className="row-example" dangerouslySetInnerHTML={{ __html: entry.example_sentence }} />
-            <span className="row-level">
-              {entry.source === "custom"
-                ? `Custom · HSK ${entry.hsk_level ?? "?"}`
-                : entry.hsk_level
-                  ? `HSK ${entry.hsk_level}`
-                  : "HSK ?"}
-            </span>
+            <span className="row-level">{entryLevelLabel(entry)}</span>
           </button>
         ))}
       </section>

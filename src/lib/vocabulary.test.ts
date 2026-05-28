@@ -32,13 +32,28 @@ const entries: VocabularyEntry[] = [
     created_at: "2026-04-19",
     updated_at: "2026-04-19",
   },
+  {
+    id: "pursuit-of-jade-e1-001-xiang-sheng-ban",
+    hanzi: "祥胜班",
+    pinyin: "xiáng shèng bān",
+    english: "Xiangsheng troupe",
+    example_sentence: "<b>祥胜班</b>在村里演出。",
+    sentence_pinyin: "",
+    sentence_translation: "",
+    hsk_level: 4,
+    source: "Pursuit of Jade",
+    lesson: "E1",
+    notes: "",
+    created_at: "2026-05-28",
+    updated_at: "2026-05-28",
+  },
 ];
 
 describe("getVocabularyStats", () => {
   test("counts total entries, HSK levels, and custom entries", () => {
     expect(getVocabularyStats(entries)).toEqual({
-      total: 2,
-      byHskLevel: { "1": 1, "2": 1 },
+      total: 3,
+      byHskLevel: { "1": 1, "2": 1, "4": 1 },
       custom: 1,
     });
   });
@@ -49,6 +64,7 @@ describe("filterVocabulary", () => {
     expect(filterVocabulary(entries, { search: "bei" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
     expect(filterVocabulary(entries, { search: "hello" }).map((entry) => entry.hanzi)).toEqual(["你好"]);
     expect(filterVocabulary(entries, { search: "ADDED-2026" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
+    expect(filterVocabulary(entries, { search: "poj-1" }).map((entry) => entry.hanzi)).toEqual(["祥胜班"]);
   });
 
   test("matches pinyin when the search query omits spaces and tone marks", () => {
@@ -61,8 +77,10 @@ describe("filterVocabulary", () => {
     expect(filterVocabulary(entries, { hskLevel: 2 }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
     expect(filterVocabulary(entries, { hskLevel: "custom" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
     expect(filterVocabulary(entries, { source: "custom" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
+    expect(filterVocabulary(entries, { source: "Pursuit of Jade" }).map((entry) => entry.hanzi)).toEqual(["祥胜班"]);
     expect(filterVocabulary(entries, { lesson: "HSK:1.01" }).map((entry) => entry.hanzi)).toEqual(["你好"]);
     expect(filterVocabulary(entries, { tag: "ADDED-2026" }).map((entry) => entry.hanzi)).toEqual(["杯子"]);
+    expect(filterVocabulary(entries, { tag: "poj-1" }).map((entry) => entry.hanzi)).toEqual(["祥胜班"]);
   });
 });
 
@@ -77,5 +95,9 @@ describe("getDisplayTags", () => {
         ...entries[1],
       }),
     ).toEqual(["HSK2", "CUSTOM", "ADDED-2026"]);
+  });
+
+  test("generates Pursuit of Jade episode tags", () => {
+    expect(getDisplayTags(entries[2])).toEqual(["HSK4", "poj-1"]);
   });
 });
