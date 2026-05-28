@@ -146,6 +146,12 @@ export function getDisplayTags(entry: VocabularyEntry): string[] {
       tags.push(`poj-${Number(episodeMatch[1])}`);
     }
   }
+  if (entry.source === "Scissor Seven") {
+    const episodeMatch = entry.lesson.trim().match(/^E(\d+)$/i);
+    if (episodeMatch) {
+      tags.push(`ss-${Number(episodeMatch[1])}`);
+    }
+  }
   if (entry.lesson.startsWith("lesson-")) {
     tags.push(entry.lesson);
   }

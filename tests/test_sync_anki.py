@@ -90,6 +90,7 @@ class SyncAnkiTest(unittest.TestCase):
         self.assertEqual(deck_name_for_entry({"source": "hsk-2", "hsk_level": 2}), "HSK3.0::HSK2")
         self.assertEqual(deck_name_for_entry({"source": "custom", "hsk_level": 4}), "HSK3.0::CUSTOM")
         self.assertEqual(deck_name_for_entry({"source": "Pursuit of Jade", "hsk_level": 4}), "HSK3.0::Pursuit of Jade")
+        self.assertEqual(deck_name_for_entry({"source": "Scissor Seven", "hsk_level": 5}), "HSK3.0::Scissor Seven")
 
     def test_builds_pursuit_of_jade_note_with_episode_tag_and_series_deck(self):
         entry = {
@@ -109,6 +110,25 @@ class SyncAnkiTest(unittest.TestCase):
 
         self.assertEqual(note["deckName"], "HSK3.0::Pursuit of Jade")
         self.assertEqual(note["tags"], ["HSK4", "poj-1"])
+
+    def test_builds_scissor_seven_note_with_episode_tag_and_series_deck(self):
+        entry = {
+            "id": "scissor-seven-e1-001-ci-ke",
+            "hanzi": "刺客",
+            "pinyin": "cì kè",
+            "english": "assassin; killer",
+            "example_sentence": "我们去做<b>刺客</b>吧。",
+            "hsk_level": 5,
+            "source": "Scissor Seven",
+            "lesson": "E1",
+            "created_at": "2026-05-28",
+            "updated_at": "2026-05-28",
+        }
+
+        note = build_anki_note(entry, model_name="Mandarin Vocabulary")
+
+        self.assertEqual(note["deckName"], "HSK3.0::Scissor Seven")
+        self.assertEqual(note["tags"], ["HSK5", "ss-1"])
 
     def test_duplicate_query_uses_stable_vocabulary_id(self):
         query = duplicate_query("hsk2-0200-shou-biao", model_name="Mandarin Vocabulary")

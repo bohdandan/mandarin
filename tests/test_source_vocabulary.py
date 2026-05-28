@@ -46,6 +46,20 @@ class SourceVocabularyTest(unittest.TestCase):
 
         self.assertEqual(derive_tags(entry), ["HSK4", "poj-1"])
 
+    def test_scissor_seven_episode_entries_generate_episode_tag(self):
+        entry = {
+            "id": "scissor-seven-e1-001-ci-ke",
+            "hanzi": "刺客",
+            "pinyin": "cì kè",
+            "english": "assassin; killer",
+            "hsk_level": 5,
+            "source": "Scissor Seven",
+            "lesson": "E1",
+            "created_at": "2026-05-28",
+        }
+
+        self.assertEqual(derive_tags(entry), ["HSK5", "ss-1"])
+
     def test_source_filename_is_stable_and_safe(self):
         self.assertEqual(source_filename("hsk-workbook"), "hsk-workbook.json")
         self.assertEqual(source_filename("Lesson April 19"), "lesson-april-19.json")
