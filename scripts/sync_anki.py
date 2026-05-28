@@ -56,6 +56,8 @@ def deck_name_for_entry(entry: dict[str, Any], deck_prefix: str = DEFAULT_DECK_P
     source = str(entry.get("source") or "")
     if source == "custom":
         return f"{deck_prefix}::CUSTOM"
+    if source == "Pursuit of Jade":
+        return f"{deck_prefix}::Pursuit of Jade"
 
     hsk_level = entry.get("hsk_level")
     if isinstance(hsk_level, int):

@@ -270,21 +270,6 @@
     "updated_at": "2026-04-19"
   },
   {
-    "id": "custom-word-kuai-dao-de-shihou",
-    "hanzi": "快到…的时候",
-    "pinyin": "kuài dào de shíhou",
-    "english": "when it's almost time",
-    "example_sentence": "快到上课<b>的时候</b>老师来了。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 2,
-    "source": "custom",
-    "lesson": "2026",
-    "notes": "",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
-  },
-  {
     "id": "custom-word-zhaodao",
     "hanzi": "找到",
     "pinyin": "zhǎodào",
@@ -465,19 +450,19 @@
     "updated_at": "2026-04-29"
   },
   {
-    "id": "custom-word-yi-dao-jiu",
-    "hanzi": "一到…就…",
-    "pinyin": "yí dào jiù…",
-    "english": "as soon as…",
-    "example_sentence": "他<b>一到</b>家<b>就</b>睡觉。",
+    "id": "custom-word-kaiguan",
+    "hanzi": "开关",
+    "pinyin": "kāiguān",
+    "english": "switch; to turn on and off",
+    "example_sentence": "灯的<b>开关</b>在门旁边。",
     "sentence_pinyin": "",
     "sentence_translation": "",
     "hsk_level": 3,
     "source": "custom",
     "lesson": "2026",
     "notes": "",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
+    "created_at": "2026-05-27",
+    "updated_at": "2026-05-27"
   },
   {
     "id": "custom-word-fuqian",

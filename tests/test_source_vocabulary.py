@@ -32,6 +32,20 @@ class SourceVocabularyTest(unittest.TestCase):
         self.assertEqual(entry["lesson"], "2026")
         self.assertEqual(derive_tags(entry), ["HSK2", "CUSTOM", "ADDED-2026"])
 
+    def test_pursuit_of_jade_episode_entries_generate_episode_tag(self):
+        entry = {
+            "id": "pursuit-of-jade-e1-001-xiang-sheng-ban",
+            "hanzi": "祥胜班",
+            "pinyin": "xiáng shèng bān",
+            "english": "Xiangsheng troupe",
+            "hsk_level": 4,
+            "source": "Pursuit of Jade",
+            "lesson": "E1",
+            "created_at": "2026-05-28",
+        }
+
+        self.assertEqual(derive_tags(entry), ["HSK4", "poj-1"])
+
     def test_source_filename_is_stable_and_safe(self):
         self.assertEqual(source_filename("hsk-workbook"), "hsk-workbook.json")
         self.assertEqual(source_filename("Lesson April 19"), "lesson-april-19.json")
