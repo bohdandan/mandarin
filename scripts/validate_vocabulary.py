@@ -29,9 +29,9 @@ def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
     errors: list[str] = []
     seen_ids: set[str] = set()
     seen_words: set[tuple[str, str]] = set()
-    seen_semantic_words: set[tuple[str, str, str]] = set()
+    seen_semantic_words: set[tuple[str, str, str, str]] = set()
     seen_examples: set[tuple[str, str]] = set()
-    previous_hsk_sort_key: tuple[int, int, str, str] | None = None
+    previous_hsk_sort_keys: dict[str, tuple[int, int, str, str]] = {}
 
     for index, entry in enumerate(entries, start=1):
         label = entry.get("id") or f"row {index}"
@@ -55,6 +55,7 @@ def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
             seen_words.add(word_key)
 
         semantic_key = (
+            str(entry.get("source", "")),
             str(entry.get("hanzi", "")),
             normalize_pinyin_key(str(entry.get("pinyin", ""))),
             normalize_english_gloss(str(entry.get("english", ""))),
@@ -62,7 +63,7 @@ def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
         if all(semantic_key):
             if semantic_key in seen_semantic_words:
                 errors.append(
-                    f"{label}: duplicate semantic entry {semantic_key[0]} / {semantic_key[1]} / {semantic_key[2]}"
+                    f"{label}: duplicate semantic entry {semantic_key[1]} / {semantic_key[2]} / {semantic_key[3]}"
                 )
             seen_semantic_words.add(semantic_key)
 
@@ -93,9 +94,10 @@ def validate_entries(entries: list[dict[str, Any]]) -> list[str]:
                     str(entry.get("hanzi") or ""),
                     str(entry.get("id") or ""),
                 )
+                previous_hsk_sort_key = previous_hsk_sort_keys.get(source)
                 if previous_hsk_sort_key is not None and sort_key < previous_hsk_sort_key:
                     errors.append(f"{label}: out of lesson order")
-                previous_hsk_sort_key = sort_key
+                previous_hsk_sort_keys[source] = sort_key
 
     return errors
 

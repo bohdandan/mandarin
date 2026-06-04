@@ -114,7 +114,7 @@ class ValidateVocabularyTest(unittest.TestCase):
 
         self.assertIn("hsk1-0001-nihao: out of lesson order", errors)
 
-    def test_entries_reject_semantic_duplicates_with_formatting_variants(self):
+    def test_entries_allow_semantic_duplicates_across_sources(self):
         entries = [
             {
                 "id": "hsk1-0001-jichang",
@@ -123,7 +123,7 @@ class ValidateVocabularyTest(unittest.TestCase):
                 "english": "airport",
                 "source": "hsk-1",
                 "hsk_level": 1,
-                "lesson": "HSK:1.15",
+                "lesson": "HSK:1.01",
                 "example_sentence": "我爸爸在<b>机场</b>工作。",
                 "created_at": "2026-04-24",
                 "updated_at": "2026-04-24",
@@ -135,7 +135,7 @@ class ValidateVocabularyTest(unittest.TestCase):
                 "english": "airport",
                 "source": "hsk-2",
                 "hsk_level": 2,
-                "lesson": "HSK:2.15",
+                "lesson": "HSK:2.01",
                 "example_sentence": "我在<b>机场</b>等你。",
                 "created_at": "2026-04-24",
                 "updated_at": "2026-04-24",
@@ -147,7 +147,7 @@ class ValidateVocabularyTest(unittest.TestCase):
                 "english": "medicine / drug",
                 "source": "hsk-2",
                 "hsk_level": 2,
-                "lesson": "HSK:2.11",
+                "lesson": "HSK:2.02",
                 "example_sentence": "我吃了<b>药</b>就好了。",
                 "created_at": "2026-04-24",
                 "updated_at": "2026-04-24",
@@ -159,7 +159,7 @@ class ValidateVocabularyTest(unittest.TestCase):
                 "english": "medicine, drug",
                 "source": "hsk-1",
                 "hsk_level": 1,
-                "lesson": "HSK:1.12",
+                "lesson": "HSK:1.02",
                 "example_sentence": "医生给我开了<b>药</b>。",
                 "created_at": "2026-04-24",
                 "updated_at": "2026-04-24",
@@ -168,8 +168,39 @@ class ValidateVocabularyTest(unittest.TestCase):
 
         errors = validate_entries(entries)
 
-        self.assertIn("hsk2-0001-jichang: duplicate semantic entry 机场 / jichang / airport", errors)
-        self.assertIn("hsk1-0002-yao: duplicate semantic entry 药 / yao / medicine drug", errors)
+        self.assertEqual(errors, [])
+
+    def test_entries_reject_semantic_duplicates_within_a_source(self):
+        entries = [
+            {
+                "id": "hsk3-0001-jichang",
+                "hanzi": "机场",
+                "pinyin": "jī chǎng",
+                "english": "airport",
+                "source": "hsk-3",
+                "hsk_level": 3,
+                "lesson": "HSK:3.01",
+                "example_sentence": "我爸爸在<b>机场</b>工作。",
+                "created_at": "2026-04-24",
+                "updated_at": "2026-04-24",
+            },
+            {
+                "id": "hsk3-0002-jichang",
+                "hanzi": "机场",
+                "pinyin": "jīchǎng",
+                "english": "airport",
+                "source": "hsk-3",
+                "hsk_level": 3,
+                "lesson": "HSK:3.02",
+                "example_sentence": "我在<b>机场</b>等你。",
+                "created_at": "2026-04-24",
+                "updated_at": "2026-04-24",
+            },
+        ]
+
+        errors = validate_entries(entries)
+
+        self.assertIn("hsk3-0002-jichang: duplicate semantic entry 机场 / jichang / airport", errors)
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ from scripts.sync_anki import (
     duplicate_query,
     mandarin_vocabulary_css,
     mandarin_vocabulary_templates,
+    match_stale_note,
     resolve_sound_ref,
 )
 from scripts.vocabulary import strip_html
@@ -134,6 +135,28 @@ class SyncAnkiTest(unittest.TestCase):
         query = duplicate_query("hsk2-0200-shou-biao", model_name="Mandarin Vocabulary")
 
         self.assertEqual(query, 'note:"Mandarin Vocabulary" "Vocabulary ID:hsk2-0200-shou-biao"')
+
+    def test_match_stale_note_preserves_unique_word_when_source_ownership_changes(self):
+        stale_note = {"noteId": 42, "fields": {"Hanzi": {"value": "啤酒"}}}
+
+        matched = match_stale_note(
+            {"id": "hsk3-0001-pijiu", "hanzi": "啤酒"},
+            desired_hanzi_counts={"啤酒": 1},
+            stale_notes_by_hanzi={"啤酒": [stale_note]},
+        )
+
+        self.assertEqual(matched, stale_note)
+
+    def test_match_stale_note_avoids_ambiguous_cross_source_words(self):
+        stale_note = {"noteId": 42, "fields": {"Hanzi": {"value": "病人"}}}
+
+        matched = match_stale_note(
+            {"id": "hsk3-0001-bingren", "hanzi": "病人"},
+            desired_hanzi_counts={"病人": 2},
+            stale_notes_by_hanzi={"病人": [stale_note]},
+        )
+
+        self.assertIsNone(matched)
 
     def test_templates_keep_single_meta_footer_lane_on_front_and_back(self):
         templates = mandarin_vocabulary_templates()

@@ -501,11 +501,29 @@ def match_legacy_note(
     return None
 
 
+def match_stale_note(
+    entry: dict[str, Any],
+    *,
+    desired_hanzi_counts: dict[str, int],
+    stale_notes_by_hanzi: dict[str, list[dict[str, Any]]],
+) -> dict[str, Any] | None:
+    hanzi = str(entry.get("hanzi") or "")
+    candidates = stale_notes_by_hanzi.get(hanzi, [])
+    if desired_hanzi_counts.get(hanzi) == 1 and len(candidates) == 1:
+        return candidates[0]
+    return None
+
+
 def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str, dry_run: bool = False) -> dict[str, int]:
     del deck_name
     summary = {"added": 0, "migrated": 0, "updated": 0, "unchanged": 0}
     pending_actions: list[dict[str, Any]] = []
     guide_map = bulk_latin_guide_syllables([str(entry.get("hanzi") or "") for entry in entries])
+    desired_ids = {str(entry["id"]) for entry in entries}
+    desired_hanzi_counts: dict[str, int] = {}
+    for entry in entries:
+        hanzi = str(entry.get("hanzi") or "")
+        desired_hanzi_counts[hanzi] = desired_hanzi_counts.get(hanzi, 0) + 1
     tts_config: Any | None = None
 
     def custom_sound_generator(entry: dict[str, Any]) -> str:
@@ -520,7 +538,12 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
         ensure_model(model_name)
         for entry in entries:
             ensure_deck(deck_name_for_entry(entry))
-        existing_notes = {note_field_value(note, "Vocabulary ID"): note for note in model_note_infos(model_name)}
+        current_notes = model_note_infos(model_name)
+        existing_notes = {note_field_value(note, "Vocabulary ID"): note for note in current_notes}
+        stale_notes_by_hanzi: dict[str, list[dict[str, Any]]] = {}
+        for note in current_notes:
+            if note_field_value(note, "Vocabulary ID") not in desired_ids:
+                stale_notes_by_hanzi.setdefault(note_field_value(note, "Hanzi"), []).append(note)
         if len(existing_notes) < len(entries):
             legacy_notes = legacy_note_infos()
         else:
@@ -529,6 +552,7 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
         hsk_notes_by_hanzi = legacy_hsk_index(legacy_notes)
     else:
         existing_notes = {}
+        stale_notes_by_hanzi = {}
         custom_notes_by_hanzi = {}
         hsk_notes_by_hanzi = {}
 
@@ -559,6 +583,38 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                     pending_actions.append({"action": "updateNoteTags", "params": {"note": existing["noteId"], "tags": desired_tags}})
                     if len(pending_actions) >= 150:
                         flush_actions(pending_actions)
+            continue
+
+        stale = match_stale_note(
+            entry,
+            desired_hanzi_counts=desired_hanzi_counts,
+            stale_notes_by_hanzi=stale_notes_by_hanzi,
+        )
+        if stale is not None:
+            summary["migrated"] += 1
+            if not dry_run:
+                resolved_sound = resolve_sound_ref(entry, note_field_value(stale, "Sound"), custom_sound_generator)
+                pending_actions.append(
+                    {
+                        "action": "updateNoteFields",
+                        "params": {
+                            "note": {
+                                "id": stale["noteId"],
+                                "fields": entry_fields(
+                                    entry,
+                                    sound_ref=resolved_sound,
+                                    guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
+                                ),
+                            }
+                        },
+                    }
+                )
+                pending_actions.append({"action": "updateNoteTags", "params": {"note": stale["noteId"], "tags": anki_tags(entry)}})
+                if stale.get("cards"):
+                    pending_actions.append({"action": "changeDeck", "params": {"cards": stale["cards"], "deck": target_deck}})
+                stale_notes_by_hanzi[str(entry.get("hanzi") or "")].remove(stale)
+                if len(pending_actions) >= 120:
+                    flush_actions(pending_actions)
             continue
 
         legacy = match_legacy_note(

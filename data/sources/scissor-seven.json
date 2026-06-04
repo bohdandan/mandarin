@@ -405,21 +405,6 @@
     "updated_at": "2026-05-28"
   },
   {
-    "id": "scissor-seven-e1-028-zhu-yao",
-    "hanzi": "主要",
-    "pinyin": "zhǔ yào",
-    "english": "main; mainly",
-    "example_sentence": "刺客<b>主要</b>分为两种。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 3,
-    "source": "Scissor Seven",
-    "lesson": "E1",
-    "notes": "",
-    "created_at": "2026-05-28",
-    "updated_at": "2026-05-28"
-  },
-  {
     "id": "scissor-seven-e1-029-fen-wei",
     "hanzi": "分为",
     "pinyin": "fēn wéi",
@@ -720,21 +705,6 @@
     "updated_at": "2026-05-28"
   },
   {
-    "id": "scissor-seven-e1-049-pi-jiu",
-    "hanzi": "啤酒",
-    "pinyin": "pí jiǔ",
-    "english": "beer",
-    "example_sentence": "老板，再来瓶<b>啤酒</b>。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 3,
-    "source": "Scissor Seven",
-    "lesson": "E1",
-    "notes": "",
-    "created_at": "2026-05-28",
-    "updated_at": "2026-05-28"
-  },
-  {
     "id": "scissor-seven-e1-050-jian-dao",
     "hanzi": "剪刀",
     "pinyin": "jiǎn dāo",
@@ -923,21 +893,6 @@
     "sentence_pinyin": "",
     "sentence_translation": "",
     "hsk_level": 4,
-    "source": "Scissor Seven",
-    "lesson": "E1",
-    "notes": "",
-    "created_at": "2026-05-28",
-    "updated_at": "2026-05-28"
-  },
-  {
-    "id": "scissor-seven-e1-063-bian-cheng",
-    "hanzi": "变成",
-    "pinyin": "biàn chéng",
-    "english": "to become; turn into",
-    "example_sentence": "你会<b>变成</b>那个样子。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 3,
     "source": "Scissor Seven",
     "lesson": "E1",
     "notes": "",

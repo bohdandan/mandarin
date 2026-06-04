@@ -13,6 +13,10 @@
       "file": "hsk-2.json"
     },
     {
+      "source": "hsk-3",
+      "file": "hsk-3.json"
+    },
+    {
       "source": "Pursuit of Jade",
       "file": "pursuit-of-jade.json"
     },
