@@ -90,8 +90,10 @@ class SyncAnkiTest(unittest.TestCase):
         self.assertEqual(deck_name_for_entry({"source": "hsk-1", "hsk_level": 1}), "HSK3.0::HSK1")
         self.assertEqual(deck_name_for_entry({"source": "hsk-2", "hsk_level": 2}), "HSK3.0::HSK2")
         self.assertEqual(deck_name_for_entry({"source": "custom", "hsk_level": 4}), "HSK3.0::CUSTOM")
-        self.assertEqual(deck_name_for_entry({"source": "Pursuit of Jade", "hsk_level": 4}), "HSK3.0::Pursuit of Jade")
-        self.assertEqual(deck_name_for_entry({"source": "Scissor Seven", "hsk_level": 5}), "HSK3.0::Scissor Seven")
+
+    def test_deck_name_routes_series_entries_to_top_level_decks(self):
+        self.assertEqual(deck_name_for_entry({"source": "Pursuit of Jade", "hsk_level": 4}), "Pursuit of Jade")
+        self.assertEqual(deck_name_for_entry({"source": "Scissor Seven", "hsk_level": 5}), "Scissor Seven")
 
     def test_builds_pursuit_of_jade_note_with_episode_tag_and_series_deck(self):
         entry = {
@@ -109,7 +111,7 @@ class SyncAnkiTest(unittest.TestCase):
 
         note = build_anki_note(entry, model_name="Mandarin Vocabulary")
 
-        self.assertEqual(note["deckName"], "HSK3.0::Pursuit of Jade")
+        self.assertEqual(note["deckName"], "Pursuit of Jade")
         self.assertEqual(note["tags"], ["HSK4", "poj-1"])
 
     def test_builds_scissor_seven_note_with_episode_tag_and_series_deck(self):
@@ -128,7 +130,7 @@ class SyncAnkiTest(unittest.TestCase):
 
         note = build_anki_note(entry, model_name="Mandarin Vocabulary")
 
-        self.assertEqual(note["deckName"], "HSK3.0::Scissor Seven")
+        self.assertEqual(note["deckName"], "Scissor Seven")
         self.assertEqual(note["tags"], ["HSK5", "ss-1"])
 
     def test_duplicate_query_uses_stable_vocabulary_id(self):

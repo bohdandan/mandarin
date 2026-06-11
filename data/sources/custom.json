@@ -15,25 +15,10 @@
     "updated_at": "2026-04-24"
   },
   {
-    "id": "custom-word-bu-rongyi",
-    "hanzi": "不容易",
-    "pinyin": "bù róngyì",
-    "english": "not easy",
-    "example_sentence": "学中文<b>不容易</b>。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 2,
-    "source": "custom",
-    "lesson": "2026",
-    "notes": "",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
-  },
-  {
     "id": "custom-word-bu-shufu",
     "hanzi": "不舒服",
     "pinyin": "bù shūfu",
-    "english": "not feeling well",
+    "english": "unwell",
     "example_sentence": "我今天有点<b>不舒服</b>。",
     "sentence_pinyin": "",
     "sentence_translation": "",
@@ -42,7 +27,7 @@
     "lesson": "2026",
     "notes": "",
     "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
+    "updated_at": "2026-06-11"
   },
   {
     "id": "custom-word-shenme-dou",
@@ -493,21 +478,6 @@
     "notes": "",
     "created_at": "2026-04-29",
     "updated_at": "2026-04-29"
-  },
-  {
-    "id": "custom-word-shenti-jiankang",
-    "hanzi": "身体健康",
-    "pinyin": "shēntǐ jiànkāng",
-    "english": "good health",
-    "example_sentence": "祝你<b>身体健康</b>。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 3,
-    "source": "custom",
-    "lesson": "2026",
-    "notes": "",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
   },
   {
     "id": "custom-word-hai-xing",

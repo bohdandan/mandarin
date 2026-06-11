@@ -26,6 +26,7 @@ describe("App header", () => {
     const markup = renderToStaticMarkup(<App />);
 
     expect(markup).toContain('<h1 id="page-title">普通话词汇</h1>');
+    expect(markup).toContain('href="https://github.com/bohdandan/mandarin"');
     expect(markup).not.toContain("复习 words that are ready for Anki.");
     expect(markup).not.toContain('class="header-image"');
     expect(markup).not.toContain('class="eyebrow"');

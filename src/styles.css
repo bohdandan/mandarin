@@ -97,16 +97,33 @@ select {
   justify-content: space-between;
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 .theme-toggle,
-.close-button {
+.close-button,
+.repo-link {
   min-height: 36px;
   padding: 0 12px;
   border: 1px solid var(--control-border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--text);
-  cursor: pointer;
   font-weight: 800;
+}
+
+.theme-toggle,
+.close-button {
+  cursor: pointer;
+}
+
+.repo-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
 }
 
 .theme-toggle {
@@ -267,9 +284,11 @@ select {
 .word-row:hover,
 .word-row:focus-visible,
 .theme-toggle:hover,
+.repo-link:hover,
 .close-button:hover,
 .summary-line button:hover,
 .theme-toggle:focus-visible,
+.repo-link:focus-visible,
 .close-button:focus-visible,
 .summary-line button:focus-visible {
   border-color: var(--accent);

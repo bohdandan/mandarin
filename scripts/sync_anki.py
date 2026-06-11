@@ -57,9 +57,9 @@ def deck_name_for_entry(entry: dict[str, Any], deck_prefix: str = DEFAULT_DECK_P
     if source == "custom":
         return f"{deck_prefix}::CUSTOM"
     if source == "Pursuit of Jade":
-        return f"{deck_prefix}::Pursuit of Jade"
+        return "Pursuit of Jade"
     if source == "Scissor Seven":
-        return f"{deck_prefix}::Scissor Seven"
+        return "Scissor Seven"
 
     hsk_level = entry.get("hsk_level")
     if isinstance(hsk_level, int):
@@ -581,8 +581,10 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                 if not dry_run:
                     pending_actions.append({"action": "updateNoteFields", "params": {"note": {"id": existing["noteId"], "fields": desired_fields}}})
                     pending_actions.append({"action": "updateNoteTags", "params": {"note": existing["noteId"], "tags": desired_tags}})
-                    if len(pending_actions) >= 150:
-                        flush_actions(pending_actions)
+            if not dry_run and str(entry.get("source") or "") in {"Pursuit of Jade", "Scissor Seven"} and existing.get("cards"):
+                pending_actions.append({"action": "changeDeck", "params": {"cards": existing["cards"], "deck": target_deck}})
+            if not dry_run and len(pending_actions) >= 150:
+                flush_actions(pending_actions)
             continue
 
         stale = match_stale_note(

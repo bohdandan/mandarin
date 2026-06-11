@@ -1800,21 +1800,6 @@
     "updated_at": "2026-04-19"
   },
   {
-    "id": "hsk1-0316-xi-an-fandian",
-    "hanzi": "西安饭店",
-    "pinyin": "Xī'ān Fàndiàn",
-    "english": "Xi'an Restaurant",
-    "example_sentence": "我们去<b>西安饭店</b>吃晚饭。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 1,
-    "source": "hsk-1",
-    "lesson": "HSK:1.06",
-    "notes": "Proper noun section in HSK Standard Course 1 vocabulary table.",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
-  },
-  {
     "id": "hsk1-0021-chao-shi",
     "hanzi": "超市",
     "pinyin": "chāo shì",
@@ -2486,21 +2471,6 @@
     "source": "hsk-1",
     "lesson": "HSK:1.08",
     "notes": "",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
-  },
-  {
-    "id": "hsk1-0312-hu-yisheng",
-    "hanzi": "胡医生",
-    "pinyin": "Hú yīshēng",
-    "english": "Doctor Hu",
-    "example_sentence": "<b>胡医生</b>今天很忙。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 1,
-    "source": "hsk-1",
-    "lesson": "HSK:1.08",
-    "notes": "Proper noun section in HSK Standard Course 1 vocabulary table.",
     "created_at": "2026-04-19",
     "updated_at": "2026-04-19"
   },
@@ -4676,21 +4646,6 @@
     "source": "hsk-1",
     "lesson": "HSK:1.15",
     "notes": "",
-    "created_at": "2026-04-19",
-    "updated_at": "2026-04-19"
-  },
-  {
-    "id": "hsk1-0315-xi-an",
-    "hanzi": "西安",
-    "pinyin": "Xī'ān",
-    "english": "Xi'an",
-    "example_sentence": "我想去<b>西安</b>。",
-    "sentence_pinyin": "",
-    "sentence_translation": "",
-    "hsk_level": 1,
-    "source": "hsk-1",
-    "lesson": "HSK:1.15",
-    "notes": "Proper noun section in HSK Standard Course 1 vocabulary table.",
     "created_at": "2026-04-19",
     "updated_at": "2026-04-19"
   },

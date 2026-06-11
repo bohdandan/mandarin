@@ -120,15 +120,20 @@ function App() {
         <div className="header-copy">
           <div className="topline">
             <h1 id="page-title">普通话词汇</h1>
-            <button
-              aria-label={theme === "dracula" ? "Switch to light theme" : "Switch to Dracula theme"}
-              className="theme-toggle"
-              title={theme === "dracula" ? "Switch to light theme" : "Switch to Dracula theme"}
-              type="button"
-              onClick={() => setTheme(getNextTheme(theme))}
-            >
-              <span aria-hidden="true">{theme === "dracula" ? "☀" : "☾"}</span>
-            </button>
+            <div className="header-actions">
+              <a className="repo-link" href="https://github.com/bohdandan/mandarin">
+                GitHub
+              </a>
+              <button
+                aria-label={theme === "dracula" ? "Switch to light theme" : "Switch to Dracula theme"}
+                className="theme-toggle"
+                title={theme === "dracula" ? "Switch to light theme" : "Switch to Dracula theme"}
+                type="button"
+                onClick={() => setTheme(getNextTheme(theme))}
+              >
+                <span aria-hidden="true">{theme === "dracula" ? "☀" : "☾"}</span>
+              </button>
+            </div>
           </div>
           <div className="search-row">
             <label className="search-label" htmlFor="search">
