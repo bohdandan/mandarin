@@ -117,8 +117,11 @@ def derive_tags(entry: dict[str, Any]) -> list[str]:
         if episode_match:
             tags.append(f"poj-{int(episode_match.group(1))}")
     if source == "Scissor Seven":
+        season_episode_match = re.fullmatch(r"S(\d+)E(\d+)", lesson.strip(), flags=re.IGNORECASE)
         episode_match = re.fullmatch(r"E(\d+)", lesson.strip(), flags=re.IGNORECASE)
-        if episode_match:
+        if season_episode_match:
+            tags.append(f"ss-s{int(season_episode_match.group(1))}-e{int(season_episode_match.group(2))}")
+        elif episode_match:
             tags.append(f"ss-{int(episode_match.group(1))}")
     if lesson and lesson.startswith("lesson-"):
         tags.append(lesson.upper())

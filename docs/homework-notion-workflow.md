@@ -40,8 +40,44 @@ The local draft may include helper notes such as:
 - local status
 - workflow notes
 - source links
+- grammar cues for blank-filling exercises
 
 Those helper notes are for local work only and should not be published into the final Notion homework page unless they are part of the lesson content.
+
+### Grammar Cues For Fill-In Tasks
+
+When Codex generates a local homework draft and an exercise requires filling in blanks or inserting words:
+
+- add a short `语法点` note immediately before that exercise block
+- write the grammar cue in English
+- say which grammar pattern or sentence frame the answer should follow
+- keep the cue brief and structural
+- do not turn the cue into a solved example unless the user explicitly asks
+
+Examples:
+
+```md
+### 语法点
+
+- 用“比”字句比较：A 比 B + 形容词
+```
+
+```md
+### 语法点
+
+- 用“虽然……，但是……”表达转折
+```
+
+```md
+### 语法点
+
+- 用“让我觉得……”说明原因和感受
+```
+
+If one exercise block mixes different grammar targets:
+
+- either list the patterns in one short `语法点` section
+- or add brief item-level cues such as `1. 用“比”字句` and `2. 用“虽然……，但是……”`
 
 ## Publish Target
 
@@ -92,9 +128,23 @@ Use this structure when the lesson content supports it:
 
 - Dialogues are written as short speaker lines
 - Reading passages are plain paragraph text
+- In local draft files, add `->` after question prompts so the answer slot is visually obvious
 - `问题` answers stay on the same line after an arrow: `→`
 - Drill answers that fill blanks should be highlighted with red inline spans
 - When a two-line exercise needs line breaks inside one numbered item, use `<br>`
+
+For local markdown drafts, prefer this pattern:
+
+```md
+1. 明天是谁的生日？ ->
+2. 他们为什么觉得画笔是很好的礼物？ ->
+```
+
+For published Notion homework, keep the same question-answer flow but use the final answer after the arrow:
+
+```md
+1. 明天是谁的生日？→ 明天是王一雪女儿的生日。
+```
 
 Examples:
 

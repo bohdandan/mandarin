@@ -123,7 +123,7 @@ class SyncAnkiTest(unittest.TestCase):
             "example_sentence": "我们去做<b>刺客</b>吧。",
             "hsk_level": 5,
             "source": "Scissor Seven",
-            "lesson": "E1",
+            "lesson": "S1E1",
             "created_at": "2026-05-28",
             "updated_at": "2026-05-28",
         }
@@ -131,7 +131,7 @@ class SyncAnkiTest(unittest.TestCase):
         note = build_anki_note(entry, model_name="Mandarin Vocabulary")
 
         self.assertEqual(note["deckName"], "Scissor Seven")
-        self.assertEqual(note["tags"], ["HSK5", "ss-1"])
+        self.assertEqual(note["tags"], ["HSK5", "ss-s1-e1"])
 
     def test_duplicate_query_uses_stable_vocabulary_id(self):
         query = duplicate_query("hsk2-0200-shou-biao", model_name="Mandarin Vocabulary")

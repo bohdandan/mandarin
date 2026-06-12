@@ -120,6 +120,6 @@ describe("getDisplayTags", () => {
   });
 
   test("generates Scissor Seven episode tags", () => {
-    expect(getDisplayTags(entries[3])).toEqual(["HSK5", "ss-1"]);
+    expect(getDisplayTags({ ...entries[3], lesson: "S1E1" })).toEqual(["HSK5", "ss-s1-e1"]);
   });
 });

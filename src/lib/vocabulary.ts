@@ -147,8 +147,11 @@ export function getDisplayTags(entry: VocabularyEntry): string[] {
     }
   }
   if (entry.source === "Scissor Seven") {
+    const seasonEpisodeMatch = entry.lesson.trim().match(/^S(\d+)E(\d+)$/i);
     const episodeMatch = entry.lesson.trim().match(/^E(\d+)$/i);
-    if (episodeMatch) {
+    if (seasonEpisodeMatch) {
+      tags.push(`ss-s${Number(seasonEpisodeMatch[1])}-e${Number(seasonEpisodeMatch[2])}`);
+    } else if (episodeMatch) {
       tags.push(`ss-${Number(episodeMatch[1])}`);
     }
   }

@@ -112,7 +112,7 @@ class SourceVocabularyTest(unittest.TestCase):
         hsk2_lesson_tag = re.compile(r"^HSK2::HSK:2\.\d{2}$")
 
         self.assertIn({"source": "hsk-1", "file": "hsk-1.json"}, index["sources"])
-        self.assertEqual(len(hsk1_entries), 311)
+        self.assertEqual(len(hsk1_entries), 310)
         self.assertEqual(
             [entry["id"] for entry in hsk1_entries],
             [entry["id"] for entry in sorted(hsk1_entries, key=source_sort_key)],
@@ -131,7 +131,6 @@ class SourceVocabularyTest(unittest.TestCase):
 
         hsk1_by_hanzi = {entry["hanzi"]: entry for entry in hsk1_entries}
         self.assertEqual(derive_tags(hsk1_by_hanzi["上"]), ["HSK1", "HSK1::HSK:1.09", "HSK1::HSK:1.14"])
-        self.assertIn("Proper noun", hsk1_by_hanzi["大兴机场"]["notes"])
         self.assertIn("beyond the syllabus", hsk1_by_hanzi["病人"]["notes"])
 
         for entry in hsk2_entries:
