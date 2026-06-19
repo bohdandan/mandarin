@@ -10,7 +10,10 @@ This file records the durable rules for adding and maintaining vocabulary in thi
 - Current maintained sources:
   - `data/sources/hsk-1.json`
   - `data/sources/hsk-2.json`
+  - `data/sources/hsk-3.json`
   - `data/sources/custom.json`
+  - `data/sources/pursuit-of-jade.json`
+  - `data/sources/scissor-seven.json`
 
 ## Current Anki Targets
 
@@ -102,10 +105,18 @@ HSK source files should follow lesson flow, not old ID order.
 Sort rule for HSK files:
 
 1. earliest lesson in `lesson`
-2. Hanzi
-3. entry ID
+2. numeric source sequence in the entry ID
+3. Hanzi
+4. entry ID
 
 If an entry belongs to multiple lessons, use the earliest lesson for ordering.
+
+Series files should follow episode flow:
+
+1. season and episode in `lesson`
+2. numeric source sequence in the entry ID
+3. Hanzi
+4. entry ID
 
 `custom.json` does not need lesson-order sorting beyond staying clean and stable.
 

@@ -8,6 +8,7 @@ from scripts.vocabulary import (
     build_entry,
     derive_tags,
     earliest_hsk_lesson_sort_key,
+    source_sequence_sort_key,
     read_source_vocabulary,
     source_sort_key,
     source_filename,
@@ -69,12 +70,17 @@ class SourceVocabularyTest(unittest.TestCase):
         self.assertEqual(earliest_hsk_lesson_sort_key("HSK:1.09; HSK:1.14"), (1, 9))
         self.assertIsNone(earliest_hsk_lesson_sort_key("2026"))
 
+    def test_extracts_source_sequence_from_entry_id(self):
+        self.assertEqual(source_sequence_sort_key("hsk1-0015-bu-ke-qi"), 15)
+        self.assertEqual(source_sequence_sort_key("scissor-seven-e2-104-zhuan-zhu"), 104)
+        self.assertEqual(source_sequence_sort_key("custom-word-gushi"), 1_000_000)
+
     def test_writes_index_and_one_json_file_per_source(self):
         entries = [
-            {"id": "1", "source": "hsk-workbook", "hsk_level": 1, "lesson": "HSK:1.03", "hanzi": "中"},
+            {"id": "hsk1-0003-zhong", "source": "hsk-workbook", "hsk_level": 1, "lesson": "HSK:1.03", "hanzi": "中"},
             {"id": "2", "source": "custom", "hsk_level": None},
-            {"id": "3", "source": "hsk-workbook", "hsk_level": 2, "lesson": "HSK:1.01", "hanzi": "啊"},
-            {"id": "4", "source": "hsk-workbook", "hsk_level": 1, "lesson": "HSK:1.01; HSK:1.08", "hanzi": "八"},
+            {"id": "hsk1-0002-ba", "source": "hsk-workbook", "hsk_level": 1, "lesson": "HSK:1.01; HSK:1.08", "hanzi": "八"},
+            {"id": "hsk1-0001-a", "source": "hsk-workbook", "hsk_level": 2, "lesson": "HSK:1.01", "hanzi": "啊"},
         ]
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -97,9 +103,9 @@ class SourceVocabularyTest(unittest.TestCase):
                     ]
                 },
             )
-            self.assertEqual([entry["id"] for entry in hsk], ["4", "3", "1"])
+            self.assertEqual([entry["id"] for entry in hsk], ["hsk1-0001-a", "hsk1-0002-ba", "hsk1-0003-zhong"])
             self.assertEqual([entry["id"] for entry in custom], ["2"])
-            self.assertEqual([entry["id"] for entry in round_trip], ["2", "4", "3", "1"])
+            self.assertEqual([entry["id"] for entry in round_trip], ["2", "hsk1-0001-a", "hsk1-0002-ba", "hsk1-0003-zhong"])
             self.assertFalse((output_dir / "stale.json").exists())
 
     def test_committed_sources_generate_anki_ready_tags(self):

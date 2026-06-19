@@ -199,12 +199,52 @@ def source_filename(source: str) -> str:
     return f"{normalized or 'unknown'}.json"
 
 
-def source_sort_key(entry: dict[str, Any]) -> tuple[bool, int, str]:
+def source_sequence_sort_key(entry_id: str) -> int:
+    match = re.search(r"-(\d{3,4})(?:-|$)", str(entry_id))
+    return int(match.group(1)) if match else 1_000_000
+
+
+def series_lesson_sort_key(value: str) -> tuple[int, int] | None:
+    season_episode_match = re.fullmatch(r"S(\d+)E(\d+)", value.strip(), flags=re.IGNORECASE)
+    if season_episode_match:
+        return (int(season_episode_match.group(1)), int(season_episode_match.group(2)))
+    episode_match = re.fullmatch(r"E(\d+)", value.strip(), flags=re.IGNORECASE)
+    if episode_match:
+        return (0, int(episode_match.group(1)))
+    return None
+
+
+def source_sort_key(entry: dict[str, Any]) -> tuple[int, int, int, int, str, str]:
     earliest_lesson = earliest_hsk_lesson_sort_key(str(entry.get("lesson") or ""))
     if earliest_lesson is not None:
         lesson_level, lesson_number = earliest_lesson
-        return (False, lesson_level * 100 + lesson_number, str(entry.get("hanzi") or ""), entry["id"])
-    return (entry.get("hsk_level") is None, (entry.get("hsk_level") or 99) * 100, str(entry.get("hanzi") or ""), entry["id"])
+        return (
+            0,
+            lesson_level,
+            lesson_number,
+            source_sequence_sort_key(str(entry.get("id") or "")),
+            str(entry.get("hanzi") or ""),
+            str(entry.get("id") or ""),
+        )
+    series_lesson = series_lesson_sort_key(str(entry.get("lesson") or ""))
+    if series_lesson is not None:
+        season, episode = series_lesson
+        return (
+            1,
+            season,
+            episode,
+            source_sequence_sort_key(str(entry.get("id") or "")),
+            str(entry.get("hanzi") or ""),
+            str(entry.get("id") or ""),
+        )
+    return (
+        2,
+        1 if entry.get("hsk_level") is None else 0,
+        int(entry.get("hsk_level") or 99),
+        source_sequence_sort_key(str(entry.get("id") or "")),
+        str(entry.get("hanzi") or ""),
+        str(entry.get("id") or ""),
+    )
 
 
 def entry_without_generated_fields(entry: dict[str, Any]) -> dict[str, Any]:

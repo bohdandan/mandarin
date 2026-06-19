@@ -97,6 +97,12 @@ class ChineseSupportToneFieldTest(unittest.TestCase):
         self.assertEqual(visible_text(custom["Pinyin"]), "niúyóuguǒ")
         self.assertIn('class="tone2"', custom["Color"])
 
+    def test_build_display_tone_fields_prefers_marked_pinyin_when_guide_is_polyphonic(self):
+        fields = build_display_tone_fields("了解", "liǎojiě", guide_syllables=["le", "jiě"])
+
+        self.assertEqual(fields["Color"], '<span class="tone3">了</span><span class="tone3">解</span>')
+        self.assertIn('<span class="tone3">liǎo</span><span class="tone3">jiě</span>', fields["Pinyin"])
+
     def test_reconcile_generated_tags_replaces_lowercase_variants(self):
         to_add, to_remove = reconcile_generated_tags(
             ["hsk2", "custom", "added-2026", "keep-me"],

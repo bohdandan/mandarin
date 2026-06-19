@@ -20,7 +20,7 @@ from scripts.chinese_support import (
     written_chinese_footer_html,
     written_chinese_footer_placeholder_html,
 )
-from scripts.google_tts import load_google_tts_config, synthesize_audio
+from scripts.google_tts import load_google_tts_config, synthesize_audio, synthesize_text_audio
 from scripts.vocabulary import derive_tags, pinyin_slug, read_source_vocabulary, read_vocabulary, strip_html
 
 
@@ -38,18 +38,23 @@ ANKI_FIELDS = [
     "Pinyin",
     "English",
     "Example Sentence",
+    "Sentence Pinyin",
+    "Sentence Translation",
+    "Example Sound",
     "Silhouette",
     "Sound",
 ]
 
 OBSOLETE_ANKI_FIELDS = [
-    "Sentence Pinyin",
-    "Sentence Translation",
 ]
 
 
 def anki_tags(entry: dict[str, Any]) -> list[str]:
     return derive_tags(entry)
+
+
+def equivalent_tags(current_tags: list[str], desired_tags: list[str]) -> bool:
+    return set(current_tags) == set(desired_tags)
 
 
 def deck_name_for_entry(entry: dict[str, Any], deck_prefix: str = DEFAULT_DECK_PREFIX) -> str:
@@ -71,6 +76,7 @@ def deck_name_for_entry(entry: dict[str, Any], deck_prefix: str = DEFAULT_DECK_P
 def entry_fields(
     entry: dict[str, Any],
     sound_ref: str = "",
+    example_sound_ref: str = "",
     *,
     guide_syllables: list[str] | None = None,
 ) -> dict[str, str]:
@@ -86,6 +92,9 @@ def entry_fields(
         "Pinyin": tone_fields["Pinyin"],
         "English": str(entry.get("english") or ""),
         "Example Sentence": str(entry.get("example_sentence") or ""),
+        "Sentence Pinyin": str(entry.get("sentence_pinyin") or ""),
+        "Sentence Translation": str(entry.get("sentence_translation") or ""),
+        "Example Sound": example_sound_ref,
         "Silhouette": silhouette_text(str(entry.get("hanzi") or "")),
         "Sound": sound_ref,
     }
@@ -96,13 +105,19 @@ def build_anki_note(
     model_name: str,
     deck_prefix: str = DEFAULT_DECK_PREFIX,
     sound_ref: str = "",
+    example_sound_ref: str = "",
     *,
     guide_syllables: list[str] | None = None,
 ) -> dict[str, Any]:
     return {
         "deckName": deck_name_for_entry(entry, deck_prefix=deck_prefix),
         "modelName": model_name,
-        "fields": entry_fields(entry, sound_ref=sound_ref, guide_syllables=guide_syllables),
+        "fields": entry_fields(
+            entry,
+            sound_ref=sound_ref,
+            example_sound_ref=example_sound_ref,
+            guide_syllables=guide_syllables,
+        ),
         "tags": anki_tags(entry),
         "options": {"allowDuplicate": False, "duplicateScope": "deck"},
     }
@@ -115,6 +130,16 @@ def generate_sound_ref(entry: dict[str, Any], config: Any) -> str:
     return f"[sound:{filename}]"
 
 
+def generate_example_sound_ref(entry: dict[str, Any], config: Any) -> str:
+    example_sentence = strip_html(str(entry.get("example_sentence") or ""))
+    if not example_sentence:
+        return ""
+    filename, audio_bytes = synthesize_text_audio(f"{entry['id']}_example", example_sentence, config)
+    payload = base64.b64encode(audio_bytes).decode("ascii")
+    invoke_anki("storeMediaFile", {"filename": filename, "data": payload})
+    return f"[sound:{filename}]"
+
+
 def resolve_sound_ref(
     entry: dict[str, Any],
     current_sound: str,
@@ -122,6 +147,18 @@ def resolve_sound_ref(
 ) -> str:
     if str(current_sound or "").strip():
         return current_sound
+    return sound_generator(entry)
+
+
+def resolve_example_sound_ref(
+    entry: dict[str, Any],
+    current_sound: str,
+    sound_generator: Any,
+) -> str:
+    if str(current_sound or "").strip():
+        return current_sound
+    if not str(entry.get("example_sentence") or "").strip():
+        return ""
     return sound_generator(entry)
 
 
@@ -222,6 +259,40 @@ def mandarin_vocabulary_css() -> str:
   margin-top: 12px;
 }
 
+.example-block {
+  margin-top: 14px;
+  padding: 10px 12px 12px;
+  border-left: 3px solid rgba(255, 184, 108, 0.65);
+  border-radius: 6px;
+  background: rgba(98, 114, 164, 0.08);
+  text-align: center;
+}
+
+.example-block .comment {
+  margin-top: 0;
+}
+
+.example-sound-row {
+  display: flex;
+  justify-content: center;
+}
+
+.sentence-pinyin,
+.sentence-translation {
+  font-size: 16px;
+  line-height: 1.45;
+  margin-top: 8px;
+  opacity: 0.82;
+}
+
+.sentence-translation {
+  color: #6c757d;
+}
+
+.night_mode .sentence-translation {
+  color: #6272a4;
+}
+
 .tags {
   font-size: 9pt;
   opacity: 0.6;
@@ -230,11 +301,73 @@ def mandarin_vocabulary_css() -> str:
 
 .sound { margin-top: 10px; }
 
+.audio-control {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  padding: 4px 10px;
+  border: 1px solid rgba(108, 117, 125, 0.35);
+  border-radius: 999px;
+}
+
+.audio-control .sound {
+  margin-top: 0;
+  line-height: 1;
+}
+
+.audio-label {
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6c757d;
+}
+
+.word-audio .audio-label {
+  color: #0077b6;
+}
+
+.example-audio {
+  margin-top: 14px;
+}
+
+.example-audio .audio-label {
+  color: #c05600;
+}
+
+.night_mode .audio-control {
+  border-color: rgba(248, 248, 242, 0.28);
+}
+
+.night_mode .audio-label {
+  color: #f8f8f2;
+}
+
+.night_mode .word-audio .audio-label {
+  color: #8be9fd;
+}
+
+.night_mode .example-audio .audio-label {
+  color: #ffb86c;
+}
+
 .card-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 0;
 }
 
 .tone1 { color: #0077b6; }
@@ -267,9 +400,14 @@ def mandarin_vocabulary_css() -> str:
 }
 
 .written-chinese-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   color: #6c757d;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 22px;
   line-height: 1;
   opacity: 0.85;
 }
@@ -285,14 +423,23 @@ def mandarin_vocabulary_css() -> str:
 
 .written-chinese-placeholder {
   visibility: hidden;
-  font-size: 14px;
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 22px;
   line-height: 1;
 }
 
 @media (max-width: 600px) {
   .card {
     padding: 10px 14px 14px;
-    min-height: 0;
+    min-height: calc(100vh - 190px);
+    min-height: calc(100dvh - 190px);
+  }
+
+  .card-content {
+    min-height: calc(100vh - 190px);
+    min-height: calc(100dvh - 190px);
   }
 
   .top {
@@ -307,8 +454,26 @@ def mandarin_vocabulary_css() -> str:
     margin: 12px 0;
   }
 
+  .example-block {
+    padding: 10px 10px 12px;
+    text-align: left;
+  }
+
+  .example-sound-row {
+    justify-content: flex-end;
+  }
+
   .meta-row {
+    order: 99;
+    margin-top: 8px;
     padding-top: 8px;
+  }
+
+  .card-actions {
+    order: 98;
+    justify-content: flex-end;
+    margin-top: auto;
+    margin-bottom: 8px;
   }
 }
 """.strip()
@@ -317,6 +482,18 @@ def mandarin_vocabulary_css() -> str:
 def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
     placeholder_footer = written_chinese_footer_placeholder_html()
     back_footer = written_chinese_footer_html()
+    word_audio = """
+<div class="audio-control word-audio" aria-label="Word audio">
+  <span class="audio-label">Word</span>
+  <div class="sound">{{Sound}}</div>
+</div>
+""".strip()
+    example_audio = """
+<div class="audio-control example-audio" aria-label="Example sentence audio">
+  <span class="audio-label">Example</span>
+  <div class="sound">{{Example Sound}}</div>
+</div>
+""".strip()
     return {
         "Recognition": {
             "Front": f"""
@@ -324,10 +501,10 @@ def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
   <div class="top">
     <div class="pinyin">&nbsp;</div>
     <span class="chinese">{{{{Hanzi}}}}</span>
-    <div class="sound">{{{{Sound}}}}</div>
   </div>
 
   <hr class="divider">
+  <div class="card-actions">{word_audio}</div>
   {placeholder_footer}
 </div>
 """.strip(),
@@ -336,7 +513,6 @@ def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
   <div class="top">
     <div class="pinyin">{{{{Pinyin}}}}</div>
     <div class="chinese">{{{{Color}}}}</div>
-\t  <div class="sound">{{{{Sound}}}}</div>
   </div>
 
   <hr class="divider">
@@ -345,9 +521,19 @@ def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
     <div class="english">{{{{English}}}}</div>
 
     {{{{#Example Sentence}}}}
-    <div class="comment">{{{{Example Sentence}}}}</div>
+    <div class="example-block">
+      <div class="comment">{{{{Example Sentence}}}}</div>
+      <div class="example-sound-row">{example_audio}</div>
+      {{{{#Sentence Pinyin}}}}
+      <div class="sentence-pinyin">{{{{Sentence Pinyin}}}}</div>
+      {{{{/Sentence Pinyin}}}}
+      {{{{#Sentence Translation}}}}
+      <div class="sentence-translation">{{{{Sentence Translation}}}}</div>
+      {{{{/Sentence Translation}}}}
+    </div>
     {{{{/Example Sentence}}}}
   </div>
+  <div class="card-actions">{word_audio}</div>
   {back_footer}
 </div>
 """.strip(),
@@ -380,11 +566,20 @@ def mandarin_vocabulary_templates() -> dict[str, dict[str, str]]:
     <div class="pinyin">{{{{Pinyin}}}}</div>
     <div class="chinese">{{{{Color}}}}</div>
     {{{{#Example Sentence}}}}
-    <div class="comment">{{{{Example Sentence}}}}</div>
+    <div class="example-block">
+      <div class="comment">{{{{Example Sentence}}}}</div>
+      <div class="example-sound-row">{example_audio}</div>
+      {{{{#Sentence Pinyin}}}}
+      <div class="sentence-pinyin">{{{{Sentence Pinyin}}}}</div>
+      {{{{/Sentence Pinyin}}}}
+      {{{{#Sentence Translation}}}}
+      <div class="sentence-translation">{{{{Sentence Translation}}}}</div>
+      {{{{/Sentence Translation}}}}
+    </div>
     {{{{/Example Sentence}}}}
   </div>
 
-  <div class="sound">{{{{Sound}}}}</div>
+  <div class="card-actions">{word_audio}</div>
   {back_footer}
 </div>
 """.strip(),
@@ -514,6 +709,58 @@ def match_stale_note(
     return None
 
 
+def ordered_card_ids_for_entries(entries: list[dict[str, Any]], notes_by_vocabulary_id: dict[str, dict[str, Any]]) -> list[int]:
+    ordered_card_ids: list[int] = []
+    for entry in entries:
+        note = notes_by_vocabulary_id.get(str(entry.get("id") or ""))
+        if not note:
+            continue
+        ordered_card_ids.extend(sorted(int(card_id) for card_id in note.get("cards", [])))
+    return ordered_card_ids
+
+
+def supported_reposition_action() -> str | None:
+    try:
+        reflected = invoke_anki("apiReflect", {"scopes": ["actions"], "actions": ["repositionNewCards", "repositionCards"]})
+    except RuntimeError:
+        return None
+    actions = set(reflected.get("actions", []))
+    if "repositionNewCards" in actions:
+        return "repositionNewCards"
+    if "repositionCards" in actions:
+        return "repositionCards"
+    return None
+
+
+def reposition_new_cards(entries: list[dict[str, Any]], notes_by_vocabulary_id: dict[str, dict[str, Any]]) -> None:
+    action = supported_reposition_action()
+    if action is None:
+        print(
+            "WARNING: AnkiConnect does not support new-card repositioning; source JSON remains ordered for future imports.",
+            file=sys.stderr,
+        )
+        return
+
+    entries_by_deck: dict[str, list[dict[str, Any]]] = {}
+    for entry in entries:
+        entries_by_deck.setdefault(deck_name_for_entry(entry), []).append(entry)
+
+    for deck_entries in entries_by_deck.values():
+        card_ids = ordered_card_ids_for_entries(deck_entries, notes_by_vocabulary_id)
+        if not card_ids:
+            continue
+        invoke_anki(
+            action,
+            {
+                "cards": card_ids,
+                "startingFrom": 1,
+                "step": 1,
+                "randomize": False,
+                "shiftPositionOfExistingCards": True,
+            },
+        )
+
+
 def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str, dry_run: bool = False) -> dict[str, int]:
     del deck_name
     summary = {"added": 0, "migrated": 0, "updated": 0, "unchanged": 0}
@@ -533,6 +780,14 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
             env.setdefault("GOOGLE_TTS_VOICE_NAME", DEFAULT_GOOGLE_TTS_VOICE)
             tts_config = load_google_tts_config(env)
         return generate_sound_ref(entry, tts_config)
+
+    def example_sound_generator(entry: dict[str, Any]) -> str:
+        nonlocal tts_config
+        if tts_config is None:
+            env = dict(os.environ)
+            env.setdefault("GOOGLE_TTS_VOICE_NAME", DEFAULT_GOOGLE_TTS_VOICE)
+            tts_config = load_google_tts_config(env)
+        return generate_example_sound_ref(entry, tts_config)
 
     if not dry_run:
         ensure_model(model_name)
@@ -569,12 +824,18 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
             if not enriched_entry.get("example_sentence") and existing_example:
                 enriched_entry["example_sentence"] = existing_example
             resolved_sound = resolve_sound_ref(entry, note_field_value(existing, "Sound"), custom_sound_generator)
+            resolved_example_sound = resolve_example_sound_ref(
+                enriched_entry,
+                note_field_value(existing, "Example Sound"),
+                example_sound_generator,
+            )
             desired_fields = entry_fields(
                 enriched_entry,
                 sound_ref=resolved_sound,
+                example_sound_ref=resolved_example_sound,
                 guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
             )
-            if current_fields == desired_fields and existing.get("tags", []) == desired_tags:
+            if current_fields == desired_fields and equivalent_tags(existing.get("tags", []), desired_tags):
                 summary["unchanged"] += 1
             else:
                 summary["updated"] += 1
@@ -596,6 +857,7 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
             summary["migrated"] += 1
             if not dry_run:
                 resolved_sound = resolve_sound_ref(entry, note_field_value(stale, "Sound"), custom_sound_generator)
+                resolved_example_sound = resolve_example_sound_ref(entry, note_field_value(stale, "Example Sound"), example_sound_generator)
                 pending_actions.append(
                     {
                         "action": "updateNoteFields",
@@ -605,6 +867,7 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                                 "fields": entry_fields(
                                     entry,
                                     sound_ref=resolved_sound,
+                                    example_sound_ref=resolved_example_sound,
                                     guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
                                 ),
                             }
@@ -630,6 +893,11 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                 enriched_entry = dict(entry)
                 if not enriched_entry.get("example_sentence"):
                     enriched_entry["example_sentence"] = legacy_example_sentence(legacy)
+                resolved_example_sound = resolve_example_sound_ref(
+                    enriched_entry,
+                    note_field_value(legacy, "Example Sound"),
+                    example_sound_generator,
+                )
                 pending_actions.append(
                     {
                         "action": "updateNoteModel",
@@ -640,6 +908,7 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                                 "fields": entry_fields(
                                     enriched_entry,
                                     sound_ref=resolve_sound_ref(entry, note_field_value(legacy, "Sound"), custom_sound_generator),
+                                    example_sound_ref=resolved_example_sound,
                                     guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
                                 ),
                                 "tags": anki_tags(entry),
@@ -663,6 +932,7 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                         entry,
                         model_name=model_name,
                         sound_ref=resolve_sound_ref(entry, "", custom_sound_generator),
+                        example_sound_ref=resolve_example_sound_ref(entry, "", example_sound_generator),
                         guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
                     )
                 },
@@ -670,6 +940,9 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
 
     if not dry_run:
         flush_actions(pending_actions)
+        current_notes = model_note_infos(model_name)
+        notes_by_vocabulary_id = {note_field_value(note, "Vocabulary ID"): note for note in current_notes}
+        reposition_new_cards(entries, notes_by_vocabulary_id)
         normalize_generated_tag_case()
     return summary
 

@@ -6,15 +6,21 @@ from scripts.sync_anki import (
     build_anki_note,
     deck_name_for_entry,
     duplicate_query,
+    equivalent_tags,
     mandarin_vocabulary_css,
     mandarin_vocabulary_templates,
     match_stale_note,
+    ordered_card_ids_for_entries,
     resolve_sound_ref,
 )
 from scripts.vocabulary import strip_html
 
 
 class SyncAnkiTest(unittest.TestCase):
+    def test_equivalent_tags_ignores_anki_tag_order(self):
+        self.assertTrue(equivalent_tags(["ADDED-2026", "CUSTOM", "HSK3"], ["HSK3", "CUSTOM", "ADDED-2026"]))
+        self.assertFalse(equivalent_tags(["CUSTOM", "HSK3"], ["HSK3", "CUSTOM", "ADDED-2026"]))
+
     def test_resolve_sound_ref_generates_audio_for_custom_entries_without_sound(self):
         entry = {"id": "custom-word-xinwen", "hanzi": "新闻", "source": "custom"}
         generator = Mock(return_value="[sound:custom-word-xinwen_google-cmn-cn-wavenet-c.mp3]")
@@ -50,7 +56,7 @@ class SyncAnkiTest(unittest.TestCase):
             "english": "watch",
             "example_sentence": "这是我的<b>手表</b>。",
             "sentence_pinyin": "zhè shì wǒ de shǒu biǎo",
-            "sentence_translation": "",
+            "sentence_translation": "This is my watch.",
             "hsk_level": 2,
             "source": "hsk-2",
             "lesson": "HSK:2.08",
@@ -59,7 +65,12 @@ class SyncAnkiTest(unittest.TestCase):
             "updated_at": "2026-04-19",
         }
 
-        note = build_anki_note(entry, model_name="Mandarin Vocabulary", sound_ref="[sound:watch.mp3]")
+        note = build_anki_note(
+            entry,
+            model_name="Mandarin Vocabulary",
+            sound_ref="[sound:watch.mp3]",
+            example_sound_ref="[sound:sentence.mp3]",
+        )
 
         self.assertEqual(note["deckName"], "HSK3.0::HSK2")
         self.assertEqual(note["modelName"], "Mandarin Vocabulary")
@@ -72,6 +83,9 @@ class SyncAnkiTest(unittest.TestCase):
                 "Pinyin",
                 "English",
                 "Example Sentence",
+                "Sentence Pinyin",
+                "Sentence Translation",
+                "Example Sound",
                 "Silhouette",
                 "Sound",
             ],
@@ -82,6 +96,9 @@ class SyncAnkiTest(unittest.TestCase):
         self.assertEqual(strip_html(note["fields"]["Pinyin"]).strip(), "shǒu biǎo")
         self.assertEqual(note["fields"]["English"], "watch")
         self.assertEqual(note["fields"]["Example Sentence"], "这是我的<b>手表</b>。")
+        self.assertEqual(note["fields"]["Sentence Pinyin"], "zhè shì wǒ de shǒu biǎo")
+        self.assertEqual(note["fields"]["Sentence Translation"], "This is my watch.")
+        self.assertEqual(note["fields"]["Example Sound"], "[sound:sentence.mp3]")
         self.assertEqual(note["fields"]["Silhouette"], "_ _")
         self.assertEqual(note["fields"]["Sound"], "[sound:watch.mp3]")
         self.assertEqual(note["tags"], ["HSK2", "HSK2::HSK:2.08"])
@@ -160,6 +177,20 @@ class SyncAnkiTest(unittest.TestCase):
 
         self.assertIsNone(matched)
 
+    def test_ordered_card_ids_follow_entry_order_and_card_order(self):
+        entries = [
+            {"id": "scissor-seven-e1-001-ren-wu"},
+            {"id": "scissor-seven-e1-002-huai-ren"},
+        ]
+        notes_by_id = {
+            "scissor-seven-e1-002-huai-ren": {"cards": [22, 21]},
+            "scissor-seven-e1-001-ren-wu": {"cards": [12, 11]},
+        }
+
+        card_ids = ordered_card_ids_for_entries(entries, notes_by_id)
+
+        self.assertEqual(card_ids, [11, 12, 21, 22])
+
     def test_templates_keep_single_meta_footer_lane_on_front_and_back(self):
         templates = mandarin_vocabulary_templates()
 
@@ -191,7 +222,34 @@ class SyncAnkiTest(unittest.TestCase):
         self.assertIn("{{#Example Sentence}}", recall_back)
         self.assertIn("{{Example Sentence}}", recall_back)
         self.assertIn("{{/Example Sentence}}", recall_back)
+        self.assertIn("{{#Sentence Pinyin}}", recall_back)
+        self.assertIn("{{Sentence Pinyin}}", recall_back)
+        self.assertIn("{{#Sentence Translation}}", recall_back)
+        self.assertIn("{{Sentence Translation}}", recall_back)
+        self.assertIn("{{Example Sound}}", recall_back)
         self.assertIn("{{Sound}}", recall_back)
+
+    def test_templates_label_word_and_example_audio_controls(self):
+        templates = mandarin_vocabulary_templates()
+
+        recognition_front = templates["Recognition"]["Front"]
+        recognition_back = templates["Recognition"]["Back"]
+        recall_back = templates["Recall"]["Back"]
+
+        self.assertIn('class="audio-control word-audio"', recognition_front)
+        self.assertIn('aria-label="Word audio"', recognition_front)
+        self.assertIn('<span class="audio-label">Word</span>', recognition_front)
+        self.assertIn('class="card-actions"', recognition_front)
+        self.assertIn('class="audio-control word-audio"', recognition_back)
+        self.assertIn('class="card-actions"', recognition_back)
+        self.assertIn('class="audio-control example-audio"', recognition_back)
+        self.assertIn('aria-label="Example sentence audio"', recognition_back)
+        self.assertIn('<span class="audio-label">Example</span>', recognition_back)
+        self.assertIn('class="example-block"', recognition_back)
+        self.assertIn('class="audio-control word-audio"', recall_back)
+        self.assertIn('class="card-actions"', recall_back)
+        self.assertIn('class="audio-control example-audio"', recall_back)
+        self.assertIn('class="example-block"', recall_back)
 
     def test_css_uses_tighter_top_and_divider_spacing_with_mobile_fallback(self):
         css = mandarin_vocabulary_css()
@@ -203,6 +261,48 @@ class SyncAnkiTest(unittest.TestCase):
         self.assertIn("@media (max-width: 600px)", css)
         self.assertIn("padding: 10px 14px 14px;", css)
         self.assertIn("margin: 10px 0;", css)
+
+    def test_css_styles_labeled_audio_controls(self):
+        css = mandarin_vocabulary_css()
+
+        self.assertIn(".audio-control", css)
+        self.assertIn(".audio-label", css)
+        self.assertIn("grid-template-columns: auto auto;", css)
+        self.assertIn("border: 1px solid", css)
+        self.assertIn(".example-audio", css)
+        self.assertIn(".example-block", css)
+        self.assertIn(".example-sound-row", css)
+        self.assertIn("background: rgba(98, 114, 164, 0.08);", css)
+        self.assertIn("border-left: 3px solid rgba(255, 184, 108, 0.65);", css)
+        self.assertIn("background: rgba(98, 114, 164, 0.08);\n  text-align: center;", css)
+        self.assertIn(".example-block {\n    padding: 10px 10px 12px;\n    text-align: left;", css)
+
+    def test_css_keeps_word_audio_in_bottom_action_row_without_overlay(self):
+        css = mandarin_vocabulary_css()
+
+        self.assertIn(".card-actions", css)
+        self.assertIn("justify-content: center;", css)
+        self.assertIn("margin-top: 10px;", css)
+        self.assertIn("margin-bottom: 0;", css)
+        self.assertIn("order: 98;", css)
+        self.assertIn("justify-content: flex-end;", css)
+        self.assertIn("margin-top: auto;", css)
+        self.assertIn("margin-bottom: 8px;", css)
+        self.assertIn("min-height: calc(100vh - 190px);", css)
+        self.assertIn("min-height: calc(100dvh - 190px);", css)
+        self.assertIn(".card-content {", css)
+        self.assertIn("order: 99;", css)
+        self.assertIn("margin-top: 8px;", css)
+        self.assertIn(".example-sound-row {", css)
+        self.assertNotIn("position: fixed;", css)
+
+    def test_css_makes_written_chinese_link_large_tap_target(self):
+        css = mandarin_vocabulary_css()
+
+        self.assertIn("display: inline-flex;", css)
+        self.assertIn("min-width: 44px;", css)
+        self.assertIn("min-height: 44px;", css)
+        self.assertIn("font-size: 22px;", css)
 
 
 if __name__ == "__main__":

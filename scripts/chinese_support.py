@@ -10,6 +10,80 @@ from urllib.parse import quote
 
 
 PINYIN_TOKEN_RE = re.compile(r"[A-Za-züÜāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙǕǗǙǛńňǹḿŃŇǸḾ]+")
+PINYIN_INITIALS = [
+    "zh",
+    "ch",
+    "sh",
+    "b",
+    "p",
+    "m",
+    "f",
+    "d",
+    "t",
+    "n",
+    "l",
+    "g",
+    "k",
+    "h",
+    "j",
+    "q",
+    "x",
+    "r",
+    "z",
+    "c",
+    "s",
+    "y",
+    "w",
+    "",
+]
+PINYIN_FINALS = [
+    "a",
+    "ai",
+    "an",
+    "ang",
+    "ao",
+    "e",
+    "ei",
+    "en",
+    "eng",
+    "er",
+    "i",
+    "ia",
+    "ian",
+    "iang",
+    "iao",
+    "ie",
+    "in",
+    "ing",
+    "iong",
+    "iu",
+    "o",
+    "ong",
+    "ou",
+    "u",
+    "ua",
+    "uai",
+    "uan",
+    "uang",
+    "ui",
+    "un",
+    "uo",
+    "ü",
+    "üe",
+    "üan",
+    "ün",
+    "ve",
+    "van",
+    "vn",
+]
+PINYIN_SYLLABLES = {
+    f"{initial}{final}".replace("jü", "ju").replace("jüe", "jue").replace("jüan", "juan").replace("jün", "jun")
+    .replace("qü", "qu").replace("qüe", "que").replace("qüan", "quan").replace("qün", "qun")
+    .replace("xü", "xu").replace("xüe", "xue").replace("xüan", "xuan").replace("xün", "xun")
+    for initial in PINYIN_INITIALS
+    for final in PINYIN_FINALS
+}
+PINYIN_SYLLABLES.update({"zhi", "chi", "shi", "ri", "zi", "ci", "si", "yi", "wu", "yu", "yue", "yuan", "yun", "ye", "you", "yong", "yo", "m", "n", "ng"})
 GENERATED_TAG_PATTERNS = [
     re.compile(r"^HSK\d+$", re.I),
     re.compile(r"^HSK\d+::HSK:\d+\.\d{2}$", re.I),
@@ -107,7 +181,52 @@ def split_marked_pinyin_by_guide(marked_pinyin: str, guide_syllables: list[str])
         result.append(compact[start:index] or guide)
     if index < len(compact) and result:
         result[-1] += compact[index:]
-    return result
+    if len(result) == len(guide_syllables) and all(ascii_pinyin(part) in PINYIN_SYLLABLES for part in result):
+        return result
+    segmented = segment_marked_pinyin_token("".join(tokens), target_count=len(guide_syllables))
+    return segmented or result
+
+
+def segment_marked_pinyin_token(token: str, target_count: int | None = None) -> list[str]:
+    normalized = ascii_pinyin(token)
+    if not normalized:
+        return []
+    best: list[str] | None = None
+
+    def original_slice(start: int, end: int) -> str:
+        ascii_index = 0
+        original_start = 0
+        original_end = len(token)
+        for index, char in enumerate(token):
+            if ascii_index == start:
+                original_start = index
+                break
+            ascii_index += len(ascii_pinyin(char))
+        ascii_index = 0
+        for index, char in enumerate(token):
+            ascii_index += len(ascii_pinyin(char))
+            if ascii_index == end:
+                original_end = index + 1
+                break
+        return token[original_start:original_end]
+
+    def search(index: int, parts: list[tuple[int, int]]) -> None:
+        nonlocal best
+        if best is not None:
+            return
+        if index == len(normalized):
+            if target_count is None or len(parts) == target_count:
+                best = [original_slice(start, end) for start, end in parts]
+            return
+        if target_count is not None and len(parts) >= target_count:
+            return
+        for end in range(len(normalized), index, -1):
+            candidate = normalized[index:end]
+            if candidate in PINYIN_SYLLABLES:
+                search(end, [*parts, (index, end)])
+
+    search(0, [])
+    return best or []
 
 
 def tone_span(text: str, tone: int) -> str:

@@ -107,6 +107,13 @@ def google_media_filename(entry: dict[str, Any], config: GoogleTtsConfig) -> str
     return f"{entry['id']}_google-{voice_slug}.{extension}"
 
 
+def google_text_media_filename(media_id: str, config: GoogleTtsConfig) -> str:
+    extension = config.audio_encoding.lower()
+    voice_slug = re.sub(r"[^a-z0-9]+", "-", config.voice_name.lower()).strip("-")
+    safe_id = re.sub(r"[^a-zA-Z0-9_-]+", "-", media_id).strip("-")
+    return f"{safe_id}_google-{voice_slug}.{extension}"
+
+
 @lru_cache(maxsize=8)
 def _google_access_token_cached(refresh_token: str, client_id: str, client_secret: str) -> str:
     if not refresh_token or not client_id or not client_secret:
@@ -168,3 +175,32 @@ def synthesize_audio(entry: dict[str, Any], config: GoogleTtsConfig) -> tuple[st
     if not audio_content:
         raise RuntimeError("Google TTS returned no audio content.")
     return google_media_filename(entry, config), base64.b64decode(audio_content)
+
+
+def synthesize_text_audio(media_id: str, text: str, config: GoogleTtsConfig) -> tuple[str, bytes]:
+    token = google_access_token()
+    payload = json.dumps(
+        {
+            "input": {"text": text},
+            "voice": {
+                "languageCode": "cmn-CN",
+                "name": config.voice_name,
+            },
+            "audioConfig": {"audioEncoding": config.audio_encoding},
+        }
+    ).encode("utf-8")
+    request = urllib.request.Request(
+        GOOGLE_TTS_URL,
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json; charset=utf-8",
+            "x-goog-user-project": config.project_id,
+        },
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        body = json.loads(response.read().decode("utf-8"))
+    audio_content = body.get("audioContent")
+    if not audio_content:
+        raise RuntimeError("Google TTS returned no audio content.")
+    return google_text_media_filename(media_id, config), base64.b64decode(audio_content)
