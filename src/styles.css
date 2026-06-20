@@ -307,15 +307,28 @@ select {
 }
 
 .row-meaning,
-.row-example {
+.row-example,
+.row-translation {
   overflow: hidden;
   min-width: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.row-example-cell {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
 .row-example {
   color: var(--muted);
+}
+
+.row-translation {
+  color: var(--text);
+  font-size: 0.86rem;
+  opacity: 0.82;
 }
 
 .row-example b,
@@ -472,7 +485,7 @@ select {
     grid-template-columns: minmax(72px, 0.8fr) minmax(110px, 1.1fr) minmax(0, 1.4fr);
   }
 
-  .row-example,
+  .row-example-cell,
   .row-level {
     display: none;
   }

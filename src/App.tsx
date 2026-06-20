@@ -33,6 +33,31 @@ function entryLevelLabel(entry: VocabularyEntry): string {
   return level;
 }
 
+export function VocabularyRow({
+  entry,
+  onSelect,
+}: {
+  entry: VocabularyEntry;
+  onSelect: (entry: VocabularyEntry) => void;
+}) {
+  return (
+    <button
+      className="word-row"
+      type="button"
+      onClick={() => onSelect(entry)}
+    >
+      <span className="row-hanzi">{entry.hanzi}</span>
+      <span className="row-pinyin">{entry.pinyin}</span>
+      <span className="row-meaning">{entry.english}</span>
+      <span className="row-example-cell">
+        <span className="row-example" dangerouslySetInnerHTML={{ __html: entry.example_sentence }} />
+        {entry.sentence_translation ? <span className="row-translation">{entry.sentence_translation}</span> : null}
+      </span>
+      <span className="row-level">{entryLevelLabel(entry)}</span>
+    </button>
+  );
+}
+
 function App() {
   const [entries, setEntries] = useState<VocabularyEntry[]>([]);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
@@ -255,18 +280,7 @@ function App() {
         {loadState === "loading" ? <p className="status-message">Loading vocabulary...</p> : null}
         {loadState === "error" ? <p className="status-message">Vocabulary could not be loaded.</p> : null}
         {filteredEntries.map((entry) => (
-          <button
-            className="word-row"
-            key={entry.id}
-            type="button"
-            onClick={() => setSelectedEntry(entry)}
-          >
-            <span className="row-hanzi">{entry.hanzi}</span>
-            <span className="row-pinyin">{entry.pinyin}</span>
-            <span className="row-meaning">{entry.english}</span>
-            <span className="row-example" dangerouslySetInnerHTML={{ __html: entry.example_sentence }} />
-            <span className="row-level">{entryLevelLabel(entry)}</span>
-          </button>
+          <VocabularyRow entry={entry} key={entry.id} onSelect={setSelectedEntry} />
         ))}
       </section>
 
