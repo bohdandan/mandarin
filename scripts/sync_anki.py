@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import os
 import sys
@@ -41,6 +42,7 @@ ANKI_FIELDS = [
     "Sentence Pinyin",
     "Sentence Translation",
     "Example Sound",
+    "Example Audio Key",
     "Silhouette",
     "Sound",
 ]
@@ -95,6 +97,7 @@ def entry_fields(
         "Sentence Pinyin": str(entry.get("sentence_pinyin") or ""),
         "Sentence Translation": str(entry.get("sentence_translation") or ""),
         "Example Sound": example_sound_ref,
+        "Example Audio Key": example_audio_key(entry),
         "Silhouette": silhouette_text(str(entry.get("hanzi") or "")),
         "Sound": sound_ref,
     }
@@ -140,6 +143,13 @@ def generate_example_sound_ref(entry: dict[str, Any], config: Any) -> str:
     return f"[sound:{filename}]"
 
 
+def example_audio_key(entry: dict[str, Any]) -> str:
+    example_sentence = strip_html(str(entry.get("example_sentence") or "")).strip()
+    if not example_sentence:
+        return ""
+    return hashlib.sha1(example_sentence.encode("utf-8")).hexdigest()[:16]
+
+
 def resolve_sound_ref(
     entry: dict[str, Any],
     current_sound: str,
@@ -153,12 +163,18 @@ def resolve_sound_ref(
 def resolve_example_sound_ref(
     entry: dict[str, Any],
     current_sound: str,
+    current_audio_key: str,
     sound_generator: Any,
+    *,
+    force_refresh: bool = False,
 ) -> str:
-    if str(current_sound or "").strip():
-        return current_sound
     if not str(entry.get("example_sentence") or "").strip():
         return ""
+    desired_audio_key = example_audio_key(entry)
+    if force_refresh or (current_audio_key and current_audio_key != desired_audio_key):
+        return sound_generator(entry)
+    if str(current_sound or "").strip():
+        return current_sound
     return sound_generator(entry)
 
 
@@ -761,10 +777,17 @@ def reposition_new_cards(entries: list[dict[str, Any]], notes_by_vocabulary_id: 
         )
 
 
-def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str, dry_run: bool = False) -> dict[str, int]:
+def sync_entries(
+    entries: list[dict[str, Any]],
+    deck_name: str,
+    model_name: str,
+    dry_run: bool = False,
+    refresh_example_audio_ids: set[str] | None = None,
+) -> dict[str, int]:
     del deck_name
     summary = {"added": 0, "migrated": 0, "updated": 0, "unchanged": 0}
     pending_actions: list[dict[str, Any]] = []
+    refresh_example_audio_ids = refresh_example_audio_ids or set()
     guide_map = bulk_latin_guide_syllables([str(entry.get("hanzi") or "") for entry in entries])
     desired_ids = {str(entry["id"]) for entry in entries}
     desired_hanzi_counts: dict[str, int] = {}
@@ -827,7 +850,9 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
             resolved_example_sound = resolve_example_sound_ref(
                 enriched_entry,
                 note_field_value(existing, "Example Sound"),
+                note_field_value(existing, "Example Audio Key"),
                 example_sound_generator,
+                force_refresh=entry_id in refresh_example_audio_ids,
             )
             desired_fields = entry_fields(
                 enriched_entry,
@@ -857,7 +882,13 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
             summary["migrated"] += 1
             if not dry_run:
                 resolved_sound = resolve_sound_ref(entry, note_field_value(stale, "Sound"), custom_sound_generator)
-                resolved_example_sound = resolve_example_sound_ref(entry, note_field_value(stale, "Example Sound"), example_sound_generator)
+                resolved_example_sound = resolve_example_sound_ref(
+                    entry,
+                    note_field_value(stale, "Example Sound"),
+                    note_field_value(stale, "Example Audio Key"),
+                    example_sound_generator,
+                    force_refresh=entry_id in refresh_example_audio_ids,
+                )
                 pending_actions.append(
                     {
                         "action": "updateNoteFields",
@@ -896,7 +927,9 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                 resolved_example_sound = resolve_example_sound_ref(
                     enriched_entry,
                     note_field_value(legacy, "Example Sound"),
+                    note_field_value(legacy, "Example Audio Key"),
                     example_sound_generator,
+                    force_refresh=entry_id in refresh_example_audio_ids,
                 )
                 pending_actions.append(
                     {
@@ -932,7 +965,13 @@ def sync_entries(entries: list[dict[str, Any]], deck_name: str, model_name: str,
                         entry,
                         model_name=model_name,
                         sound_ref=resolve_sound_ref(entry, "", custom_sound_generator),
-                        example_sound_ref=resolve_example_sound_ref(entry, "", example_sound_generator),
+                        example_sound_ref=resolve_example_sound_ref(
+                            entry,
+                            "",
+                            "",
+                            example_sound_generator,
+                            force_refresh=entry_id in refresh_example_audio_ids,
+                        ),
                         guide_syllables=guide_map.get(str(entry.get("hanzi") or "")),
                     )
                 },
@@ -953,6 +992,12 @@ def write_sync_log(summary: dict[str, int], log_path: Path) -> None:
     log_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def read_refresh_example_audio_ids(path: Path | None) -> set[str]:
+    if path is None:
+        return set()
+    return {line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sync canonical vocabulary data to Anki through AnkiConnect.")
     parser.add_argument("--data", type=Path, default=Path("data/sources"))
@@ -960,10 +1005,21 @@ def main() -> int:
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--log", type=Path, default=Path("logs/sync/latest.md"))
+    parser.add_argument(
+        "--refresh-example-audio-ids",
+        type=Path,
+        help="Path to a newline-delimited list of vocabulary ids whose example sentence audio should be regenerated.",
+    )
     args = parser.parse_args()
 
     entries = read_source_vocabulary(args.data) if args.data.is_dir() else read_vocabulary(args.data)
-    summary = sync_entries(entries, deck_name=args.deck, model_name=args.model, dry_run=args.dry_run)
+    summary = sync_entries(
+        entries,
+        deck_name=args.deck,
+        model_name=args.model,
+        dry_run=args.dry_run,
+        refresh_example_audio_ids=read_refresh_example_audio_ids(args.refresh_example_audio_ids),
+    )
     write_sync_log(summary, args.log)
     print(f"Anki sync summary: {summary}")
     return 0

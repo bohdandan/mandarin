@@ -7,10 +7,12 @@ from scripts.sync_anki import (
     deck_name_for_entry,
     duplicate_query,
     equivalent_tags,
+    example_audio_key,
     mandarin_vocabulary_css,
     mandarin_vocabulary_templates,
     match_stale_note,
     ordered_card_ids_for_entries,
+    resolve_example_sound_ref,
     resolve_sound_ref,
 )
 from scripts.vocabulary import strip_html
@@ -46,6 +48,34 @@ class SyncAnkiTest(unittest.TestCase):
         sound = resolve_sound_ref(entry, "", generator)
 
         self.assertEqual(sound, "[sound:hsk1-0001-ai_google-cmn-cn-wavenet-c.mp3]")
+        generator.assert_called_once_with(entry)
+
+    def test_resolve_example_sound_ref_keeps_audio_when_sentence_key_matches(self):
+        entry = {"id": "hsk3-0001-ai", "example_sentence": "我<b>爱</b>学习中文。"}
+        generator = Mock()
+
+        sound = resolve_example_sound_ref(
+            entry,
+            "[sound:existing-example.mp3]",
+            example_audio_key(entry),
+            generator,
+        )
+
+        self.assertEqual(sound, "[sound:existing-example.mp3]")
+        generator.assert_not_called()
+
+    def test_resolve_example_sound_ref_regenerates_audio_when_sentence_key_changes(self):
+        entry = {"id": "hsk3-0001-ai", "example_sentence": "我<b>爱</b>学习中文。"}
+        generator = Mock(return_value="[sound:new-example.mp3]")
+
+        sound = resolve_example_sound_ref(
+            entry,
+            "[sound:old-example.mp3]",
+            "old-sentence-key",
+            generator,
+        )
+
+        self.assertEqual(sound, "[sound:new-example.mp3]")
         generator.assert_called_once_with(entry)
 
     def test_builds_hsk_note_with_generated_display_fields_and_hsk30_deck(self):
@@ -86,6 +116,7 @@ class SyncAnkiTest(unittest.TestCase):
                 "Sentence Pinyin",
                 "Sentence Translation",
                 "Example Sound",
+                "Example Audio Key",
                 "Silhouette",
                 "Sound",
             ],
@@ -99,6 +130,7 @@ class SyncAnkiTest(unittest.TestCase):
         self.assertEqual(note["fields"]["Sentence Pinyin"], "zhè shì wǒ de shǒu biǎo")
         self.assertEqual(note["fields"]["Sentence Translation"], "This is my watch.")
         self.assertEqual(note["fields"]["Example Sound"], "[sound:sentence.mp3]")
+        self.assertEqual(note["fields"]["Example Audio Key"], example_audio_key(entry))
         self.assertEqual(note["fields"]["Silhouette"], "_ _")
         self.assertEqual(note["fields"]["Sound"], "[sound:watch.mp3]")
         self.assertEqual(note["tags"], ["HSK2", "HSK2::HSK:2.08"])
